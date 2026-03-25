@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      Role     @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  SUPER_ADMIN
+}
+
+model Candidat {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  nom         String
+  prenom      String
+  age         Int?
+  photo       String?
+  parti       Parti?      @relation(fields: [partiId], references: [id])
+  partiId     String?
+  biographie  String?     @db.Text
+  programme   Json?
+  positions   Json?
+  published   Boolean     @default(false)
+  featured    Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  sondages    Sondage[]
+  actualites  Actualite[]
+}
+
+model Parti {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  nom         String
+  sigle       String?
+  logo        String?
+  couleur     String?
+  description String?     @db.Text
+  histoire    String?     @db.Text
+  ideologie   String?
+  fondation   Int?
+  published   Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  candidats   Candidat[]
+}
+
+model Sondage {
+  id          String    @id @default(cuid())
+  date        DateTime
+  institut    String
+  candidat    Candidat  @relation(fields: [candidatId], references: [id], onDelete: Cascade)
+  candidatId  String
+  score       Float
+  marge       Float?
+  source      String?
+  createdAt   DateTime  @default(now())
+}
+
+model Actualite {
+  id          String    @id @default(cuid())
+  titre       String
+  slug        String    @unique
+  resume      String?
+  contenu     String    @db.Text
+  image       String?
+  source      String?
+  sourceUrl   String?
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  candidat    Candidat? @relation(fields: [candidatId], references: [id])
+  candidatId  String?
+  tags        String[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Evenement {
+  id              String        @id @default(cuid())
+  titre           String
+  description     String?
+  lieu            String?
+  ville           String?
+  dateDebut       DateTime
+  dateFin         DateTime?
+  type            TypeEvenement @default(MEETING)
+  lienInscription String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+enum TypeEvenement {
+  MEETING
+  DEBAT
+  CONFERENCE
+  AUTRE
+}
