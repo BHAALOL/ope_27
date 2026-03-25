@@ -37,7 +37,7 @@ export function AdminSidebar() {
     <aside className="w-64 bg-dark-800 border-r border-white/5 flex flex-col h-screen sticky top-0">
       {/* Logo */}
       <div className="p-6 border-b border-white/5">
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/" prefetch={false} className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg overflow-hidden flex">
             <div className="flex-1 bg-[#002395]" />
             <div className="flex-1 bg-white" />
@@ -65,6 +65,7 @@ export function AdminSidebar() {
             <Link
               key={link.href}
               href={link.href}
+              prefetch={false}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all group",
                 active
@@ -95,6 +96,7 @@ export function AdminSidebar() {
       <div className="p-4 border-t border-white/5 space-y-2">
         <Link
           href="/"
+          prefetch={false}
           className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-all"
         >
           <Flag size={16} />
