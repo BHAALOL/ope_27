@@ -82,7 +82,7 @@ export default async function AdminDashboard() {
           const Icon = card.icon;
           const value = stats[card.key];
           return (
-            <Link key={card.key} href={card.href}>
+            <Link key={card.key} href={card.href} prefetch={false}>
               <div className="glass rounded-2xl p-5 hover:bg-white/10 transition-all border border-white/5 hover:border-white/15 group">
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
@@ -145,6 +145,7 @@ export default async function AdminDashboard() {
               <Link
                 key={action.href}
                 href={action.href}
+                prefetch={false}
                 className="flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-medium transition-all hover:opacity-80"
                 style={{
                   backgroundColor: `${action.color}20`,

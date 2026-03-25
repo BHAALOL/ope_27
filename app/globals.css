@@ -14,7 +14,7 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  /* scroll-behavior: smooth removed — interferes with Next.js App Router client-side navigation */
 }
 
 body {
