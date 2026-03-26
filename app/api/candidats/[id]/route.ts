@@ -55,9 +55,7 @@ export async function PUT(
     const body = await req.json();
     const data = UpdateSchema.parse(body);
 
-    // Build update object carefully to avoid Prisma type issues
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateData: Record<string, any> = {};
+    const updateData: Record<string, unknown> = {};
     if (data.prenom !== undefined) updateData.prenom = data.prenom;
     if (data.nom !== undefined) updateData.nom = data.nom;
     if (data.age !== undefined) updateData.age = data.age;

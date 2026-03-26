@@ -9,7 +9,8 @@ async function getCandidats() {
       include: { parti: { select: { nom: true, sigle: true, couleur: true } } },
       orderBy: { createdAt: "desc" },
     });
-  } catch {
+  } catch (error) {
+    console.error("getCandidats error:", error);
     return [];
   }
 }

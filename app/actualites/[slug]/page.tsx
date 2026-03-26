@@ -16,7 +16,8 @@ async function getArticle(slug: string) {
       where: { slug, published: true },
       include: { candidat: { include: { parti: true } } },
     });
-  } catch {
+  } catch (error) {
+    console.error("getArticle error:", error);
     return null;
   }
 }

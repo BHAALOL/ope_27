@@ -24,7 +24,8 @@ async function getCandidat(slug: string) {
         },
       },
     });
-  } catch {
+  } catch (error) {
+    console.error("getCandidat error:", error);
     return null;
   }
 }

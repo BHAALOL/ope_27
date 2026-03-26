@@ -15,7 +15,8 @@ async function getStats() {
     ]);
     const published = await prisma.candidat.count({ where: { published: true } });
     return { candidats, partis, sondages, actualites, evenements, published };
-  } catch {
+  } catch (error) {
+    console.error("getStats error:", error);
     return { candidats: 0, partis: 0, sondages: 0, actualites: 0, evenements: 0, published: 0 };
   }
 }

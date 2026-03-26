@@ -9,7 +9,8 @@ async function getPartis() {
       include: { candidats: { select: { id: true } } },
       orderBy: { createdAt: "desc" },
     });
-  } catch {
+  } catch (error) {
+    console.error("getPartis error:", error);
     return [];
   }
 }

@@ -70,8 +70,24 @@ export default function EditCandidatPage({ params }: { params: Promise<{ id: str
     try {
       let programme = null;
       let positions = null;
-      if (form.programme.trim()) programme = JSON.parse(form.programme);
-      if (form.positions.trim()) positions = JSON.parse(form.positions);
+      if (form.programme.trim()) {
+        try {
+          programme = JSON.parse(form.programme);
+        } catch {
+          setError("JSON invalide dans le champ Programme");
+          setLoading(false);
+          return;
+        }
+      }
+      if (form.positions.trim()) {
+        try {
+          positions = JSON.parse(form.positions);
+        } catch {
+          setError("JSON invalide dans le champ Positions");
+          setLoading(false);
+          return;
+        }
+      }
 
       const res = await fetch(`/api/candidats/${id}`, {
         method: "PUT",

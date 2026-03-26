@@ -15,7 +15,8 @@ async function getSondages() {
       include: { candidat: { include: { parti: true } } },
       orderBy: { date: "desc" },
     });
-  } catch {
+  } catch (error) {
+    console.error("getSondages error:", error);
     return [];
   }
 }

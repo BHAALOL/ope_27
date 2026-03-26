@@ -15,7 +15,8 @@ async function getPartis() {
       include: { candidats: { where: { published: true } } },
       orderBy: { nom: "asc" },
     });
-  } catch {
+  } catch (error) {
+    console.error("getPartis error:", error);
     return [];
   }
 }

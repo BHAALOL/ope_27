@@ -26,7 +26,8 @@ async function getHomeData() {
       }),
     ]);
     return { candidats, sondages, actualites };
-  } catch {
+  } catch (error) {
+    console.error("getHomeData error:", error);
     return { candidats: [], sondages: [], actualites: [] };
   }
 }

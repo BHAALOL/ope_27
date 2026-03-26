@@ -24,7 +24,8 @@ async function getCandidats(partiId?: string) {
       },
       orderBy: { nom: "asc" },
     });
-  } catch {
+  } catch (error) {
+    console.error("getCandidats error:", error);
     return [];
   }
 }
@@ -35,7 +36,8 @@ async function getPartis() {
       where: { published: true },
       orderBy: { nom: "asc" },
     });
-  } catch {
+  } catch (error) {
+    console.error("getPartis error:", error);
     return [];
   }
 }

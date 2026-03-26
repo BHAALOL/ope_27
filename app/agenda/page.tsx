@@ -13,7 +13,8 @@ async function getEvenements() {
     return await prisma.evenement.findMany({
       orderBy: { dateDebut: "asc" },
     });
-  } catch {
+  } catch (error) {
+    console.error("getEvenements error:", error);
     return [];
   }
 }

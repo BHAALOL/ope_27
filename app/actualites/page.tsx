@@ -27,7 +27,8 @@ async function getActualites(tag?: string, candidatId?: string) {
       },
       orderBy: { publishedAt: "desc" },
     });
-  } catch {
+  } catch (error) {
+    console.error("getActualites error:", error);
     return [];
   }
 }
@@ -39,7 +40,8 @@ async function getCandidats() {
       select: { id: true, nom: true, prenom: true },
       orderBy: { nom: "asc" },
     });
-  } catch {
+  } catch (error) {
+    console.error("getCandidats error:", error);
     return [];
   }
 }

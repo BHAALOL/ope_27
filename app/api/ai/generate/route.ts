@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 
@@ -68,6 +69,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
+    // Rate limit: 5 AI generations per minute per user
+    const { success: rateLimitOk } = rateLimit(
+      `ai-generate:${session.user.id}`,
+      5,
+      60_000
+    );
+    if (!rateLimitOk) {
+      return NextResponse.json(
+        { success: false, error: "Trop de requêtes. Veuillez patienter." },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     const { type, name, additionalContext } = RequestSchema.parse(body);
 
@@ -87,7 +101,7 @@ export async function POST(req: NextRequest) {
         : buildPartiPrompt(name, additionalContext);
 
     const message = await client.messages.create({
-      model: "claude-opus-4-5",
+      model: "claude-sonnet-4-6",
       max_tokens: 2048,
       messages: [
         {

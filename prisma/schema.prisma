@@ -82,7 +82,7 @@ model Actualite {
   sourceUrl   String?
   published   Boolean   @default(false)
   publishedAt DateTime?
-  candidat    Candidat? @relation(fields: [candidatId], references: [id])
+  candidat    Candidat? @relation(fields: [candidatId], references: [id], onDelete: SetNull)
   candidatId  String?
   tags        String[]
   createdAt   DateTime  @default(now())

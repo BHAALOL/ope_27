@@ -22,7 +22,8 @@ async function getParti(slug: string) {
         },
       },
     });
-  } catch {
+  } catch (error) {
+    console.error("getParti error:", error);
     return null;
   }
 }

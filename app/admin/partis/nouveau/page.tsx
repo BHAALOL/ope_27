@@ -7,7 +7,7 @@ import { ArrowLeft, Save } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { AIGenerator } from "@/components/admin/AIGenerator";
 
-export default function NouveauPartiPage() {
+export default function NewPartiPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -55,11 +55,7 @@ export default function NouveauPartiPage() {
         }),
       });
 
-      if (!res.ok) {
-        const json = await res.json();
-        throw new Error(json.error || "Erreur lors de la création");
-      }
-
+      if (!res.ok) throw new Error("Erreur lors de la creation");
       router.push("/admin/partis");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur inconnue");
@@ -83,25 +79,18 @@ export default function NouveauPartiPage() {
         </Link>
         <div>
           <h1 className="text-2xl font-bold text-white">Nouveau parti</h1>
-          <p className="text-gray-400 text-sm mt-0.5">Créer un nouveau parti politique</p>
+          <p className="text-gray-400 text-sm mt-0.5">Ajouter un parti politique</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="max-w-3xl space-y-8">
-        {/* AI Generation */}
         <div className="glass rounded-2xl p-6">
           <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-4">
-            Génération IA
+            G&eacute;n&eacute;ration IA
           </h2>
-          <AIGenerator
-            type="parti"
-            name={form.nom}
-            onGenerated={handleAIGenerated}
-            disabled={!form.nom}
-          />
+          <AIGenerator type="parti" name={form.nom} onGenerated={handleAIGenerated} />
         </div>
 
-        {/* Infos de base */}
         <div className="glass rounded-2xl p-6">
           <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-5">
             Informations de base
@@ -114,7 +103,6 @@ export default function NouveauPartiPage() {
                 value={form.nom}
                 onChange={(e) => setForm({ ...form, nom: e.target.value })}
                 className={inputClass}
-                placeholder="La République En Marche"
                 required
               />
             </div>
@@ -125,29 +113,24 @@ export default function NouveauPartiPage() {
                 value={form.sigle}
                 onChange={(e) => setForm({ ...form, sigle: e.target.value })}
                 className={inputClass}
-                placeholder="LREM"
               />
             </div>
             <div>
-              <label className={labelClass}>Idéologie</label>
+              <label className={labelClass}>Id&eacute;ologie</label>
               <input
                 type="text"
                 value={form.ideologie}
                 onChange={(e) => setForm({ ...form, ideologie: e.target.value })}
                 className={inputClass}
-                placeholder="Centre, Centre-droit..."
               />
             </div>
             <div>
-              <label className={labelClass}>Année de fondation</label>
+              <label className={labelClass}>Ann&eacute;e de fondation</label>
               <input
                 type="number"
                 value={form.fondation}
                 onChange={(e) => setForm({ ...form, fondation: e.target.value })}
                 className={inputClass}
-                placeholder="1958"
-                min={1800}
-                max={2030}
               />
             </div>
             <div>
@@ -164,14 +147,12 @@ export default function NouveauPartiPage() {
                   value={form.couleur}
                   onChange={(e) => setForm({ ...form, couleur: e.target.value })}
                   className={`${inputClass} flex-1`}
-                  placeholder="#6366f1"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Description */}
         <div className="glass rounded-2xl p-6">
           <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-4">
             Description
@@ -181,11 +162,9 @@ export default function NouveauPartiPage() {
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             className={`${inputClass} resize-none`}
             rows={4}
-            placeholder="Courte description du parti..."
           />
         </div>
 
-        {/* Histoire */}
         <div className="glass rounded-2xl p-6">
           <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-4">
             Histoire
@@ -195,11 +174,9 @@ export default function NouveauPartiPage() {
             onChange={(e) => setForm({ ...form, histoire: e.target.value })}
             className={`${inputClass} resize-none`}
             rows={8}
-            placeholder="Histoire du parti..."
           />
         </div>
 
-        {/* Options */}
         <div className="glass rounded-2xl p-6">
           <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-4">
             Options
@@ -211,10 +188,7 @@ export default function NouveauPartiPage() {
               onChange={(e) => setForm({ ...form, published: e.target.checked })}
               className="w-4 h-4 rounded accent-blue-500"
             />
-            <div>
-              <span className="text-sm font-medium text-white">Publier</span>
-              <p className="text-xs text-gray-500">Le parti sera visible sur le site</p>
-            </div>
+            <span className="text-sm font-medium text-white">Publi&eacute;</span>
           </label>
         </div>
 
@@ -227,7 +201,7 @@ export default function NouveauPartiPage() {
         <div className="flex gap-3">
           <Button type="submit" loading={loading} size="lg">
             <Save size={16} />
-            Créer le parti
+            Cr&eacute;er le parti
           </Button>
           <Link href="/admin/partis">
             <Button type="button" variant="ghost" size="lg">

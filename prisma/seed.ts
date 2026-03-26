@@ -7,7 +7,8 @@ async function main() {
   console.log("🌱 Seeding database...");
 
   // Create admin user
-  const hashedPassword = await bcrypt.hash("admin2027!", 12);
+  const adminPassword = process.env.ADMIN_PASSWORD || "admin2027!";
+  const hashedPassword = await bcrypt.hash(adminPassword, 12);
   const admin = await prisma.user.upsert({
     where: { email: "admin@presidentielle2027.fr" },
     update: {},
@@ -405,7 +406,7 @@ Sur le terrain économique, l'Elysée a également laissé filtrer des pistes su
   console.log("\n🎉 Database seeded successfully!");
   console.log("\n📋 Admin credentials:");
   console.log("   Email: admin@presidentielle2027.fr");
-  console.log("   Password: admin2027!");
+  console.log(`   Password: ${process.env.ADMIN_PASSWORD ? "****" : "admin2027!"}`);
 }
 
 main()
