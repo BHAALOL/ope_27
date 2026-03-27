@@ -82,7 +82,7 @@ export function NewsSearcher({ onImport }: NewsSearcherProps) {
 
   const handleImport = (result: NewsResult, index: number) => {
     onImport(result);
-    setImportedIndices((prev) => new Set([...prev, index]));
+    setImportedIndices((prev) => new Set(Array.from(prev).concat(index)));
   };
 
   const inputClass =
