@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { CandidateProfile } from "@/components/candidats/CandidateProfile";
 import type { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 interface PageProps {
   params: { slug: string };
 }

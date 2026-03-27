@@ -3,6 +3,8 @@ import { Calendar, MapPin, Clock, ExternalLink } from "lucide-react";
 import { formatDatetime, EVENT_TYPE_LABELS, EVENT_TYPE_COLORS } from "@/lib/utils";
 import type { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Agenda",
   description: "Calendrier de la campagne présidentielle 2027",

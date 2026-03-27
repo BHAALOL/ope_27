@@ -5,6 +5,8 @@ import { CandidateCard } from "@/components/candidats/CandidateCard";
 import { Building2, Calendar, Users } from "lucide-react";
 import type { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 interface PageProps {
   params: { slug: string };
 }

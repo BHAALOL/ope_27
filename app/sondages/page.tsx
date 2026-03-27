@@ -5,6 +5,8 @@ import { TrendingUp } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import type { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Sondages",
   description: "Suivez l'évolution des sondages de la présidentielle 2027",

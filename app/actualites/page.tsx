@@ -5,6 +5,8 @@ import { Newspaper, Clock, Tag } from "lucide-react";
 import { formatDate, truncate } from "@/lib/utils";
 import type { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Actualités",
   description: "Actualités de la campagne présidentielle 2027",
