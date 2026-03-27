@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { SondagesCharts } from "@/components/sondages/SondagesCharts";
+import { PolymarketSection } from "@/components/sondages/PolymarketSection";
 import { TrendingUp } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import type { Metadata } from "next";
@@ -107,9 +108,12 @@ export default async function SondagesPage() {
         </div>
 
         {sondages.length === 0 ? (
-          <div className="glass rounded-2xl p-20 text-center">
-            <TrendingUp size={48} className="text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400">Aucun sondage disponible pour le moment.</p>
+          <div className="space-y-8">
+            <div className="glass rounded-2xl p-20 text-center">
+              <TrendingUp size={48} className="text-gray-600 mx-auto mb-4" />
+              <p className="text-gray-400">Aucun sondage disponible pour le moment.</p>
+            </div>
+            <PolymarketSection />
           </div>
         ) : (
           <div className="space-y-8">
@@ -118,6 +122,9 @@ export default async function SondagesPage() {
               timeSeriesData={timeSeriesData}
               chartCandidates={chartCandidates}
             />
+
+            {/* Polymarket */}
+            <PolymarketSection />
 
             {/* Institutes */}
             <div className="glass rounded-2xl p-6">

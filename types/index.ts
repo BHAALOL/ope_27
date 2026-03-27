@@ -104,6 +104,21 @@ export interface ChartDataPoint {
   [key: string]: string | number;
 }
 
+export interface PolymarketOutcome {
+  candidat: string;
+  probabilite: number;
+  volume: number;
+}
+
+export interface PolymarketEventData {
+  titre: string;
+  slug: string;
+  outcomes: PolymarketOutcome[];
+  lastUpdated: string;
+  totalVolume: number;
+  sourceUrl: string;
+}
+
 export type AIGenerateType = 'candidat' | 'parti';
 export type AIProvider = 'anthropic' | 'openai';
 
