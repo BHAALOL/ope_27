@@ -106,6 +106,25 @@ export interface ChartDataPoint {
 
 export type AIGenerateType = 'candidat' | 'parti';
 
+export interface NewsSearchResult {
+  titre: string;
+  resume: string;
+  contenu: string;
+  source: string;
+  sourceUrl: string;
+  tags: string[];
+  candidatMentioned?: string;
+  publishedAt: string;
+}
+
+export interface NewsSearchResponse {
+  success: boolean;
+  results?: NewsSearchResult[];
+  query?: string;
+  searchedAt?: string;
+  error?: string;
+}
+
 export interface AIGenerateRequest {
   type: AIGenerateType;
   name: string;
