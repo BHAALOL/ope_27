@@ -13,6 +13,7 @@ import {
   LogOut,
   ChevronRight,
   Flag,
+  Upload,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +24,7 @@ const sidebarLinks = [
   { href: "/admin/sondages", label: "Sondages", icon: BarChart2 },
   { href: "/admin/actualites", label: "Actualités", icon: Newspaper },
   { href: "/admin/agenda", label: "Agenda", icon: Calendar },
+  { href: "/admin/import", label: "Import en masse", icon: Upload },
 ];
 
 export function AdminSidebar() {
