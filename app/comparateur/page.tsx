@@ -13,12 +13,18 @@ export default function ComparateurPage() {
 
   useEffect(() => {
     fetch("/api/candidats")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error("Erreur de chargement");
+        return r.json();
+      })
       .then((data) => {
         setCandidats(data.data || []);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        setCandidats([]);
+        setLoading(false);
+      });
   }, []);
 
   const addCandidat = (c: Candidat) => {
@@ -116,8 +122,7 @@ export default function ComparateurPage() {
           <div className="space-y-8">
             {/* Candidate headers */}
             <div
-              className={`grid gap-6`}
-              style={{ gridTemplateColumns: `repeat(${selected.length}, 1fr)` }}
+              className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
             >
               {selected.map((c) => {
                 const color = c.parti?.couleur || "#6366f1";
@@ -177,10 +182,10 @@ export default function ComparateurPage() {
                   {programmeKeys.map((key) => (
                     <div
                       key={key}
-                      className={`grid gap-0 divide-x divide-white/5`}
-                      style={{ gridTemplateColumns: `200px repeat(${selected.length}, 1fr)` }}
+                      className="grid gap-0 divide-x divide-white/5"
+                      style={{ gridTemplateColumns: `minmax(120px, 200px) repeat(${selected.length}, 1fr)` }}
                     >
-                      <div className="px-6 py-4 bg-white/3">
+                      <div className="px-4 sm:px-6 py-4 bg-white/3">
                         <span className="text-sm font-medium text-gray-300 capitalize">
                           {key.replace(/_/g, " ")}
                         </span>
@@ -189,7 +194,7 @@ export default function ComparateurPage() {
                         const prog = c.programme as Record<string, string> | null;
                         const value = prog?.[key];
                         return (
-                          <div key={c.id} className="px-6 py-4">
+                          <div key={c.id} className="px-4 sm:px-6 py-4">
                             <p className="text-sm text-gray-400">
                               {value || (
                                 <span className="text-gray-600 italic">
@@ -217,9 +222,9 @@ export default function ComparateurPage() {
                     <div
                       key={key}
                       className="grid gap-0 divide-x divide-white/5"
-                      style={{ gridTemplateColumns: `200px repeat(${selected.length}, 1fr)` }}
+                      style={{ gridTemplateColumns: `minmax(120px, 200px) repeat(${selected.length}, 1fr)` }}
                     >
-                      <div className="px-6 py-4 bg-white/3">
+                      <div className="px-4 sm:px-6 py-4 bg-white/3">
                         <span className="text-sm font-medium text-gray-300 capitalize">
                           {key.replace(/_/g, " ")}
                         </span>
@@ -228,7 +233,7 @@ export default function ComparateurPage() {
                         const pos = c.positions as Record<string, string> | null;
                         const value = pos?.[key];
                         return (
-                          <div key={c.id} className="px-6 py-4">
+                          <div key={c.id} className="px-4 sm:px-6 py-4">
                             <p className="text-sm text-gray-400">
                               {value || (
                                 <span className="text-gray-600 italic">

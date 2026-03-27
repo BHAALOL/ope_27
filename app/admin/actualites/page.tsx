@@ -37,6 +37,9 @@ export default function AdminActualitesPage() {
       setActualites(aData.data || []);
       setCandidats(cData.data || []);
       setLoading(false);
+    }).catch(() => {
+      setError("Erreur lors du chargement des données");
+      setLoading(false);
     });
   };
 

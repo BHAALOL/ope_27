@@ -7,7 +7,8 @@ async function main() {
   console.log("🌱 Seeding database...");
 
   // Create admin user
-  const hashedPassword = await bcrypt.hash("admin2027!", 12);
+  const adminPassword = process.env.ADMIN_PASSWORD || "admin2027!";
+  const hashedPassword = await bcrypt.hash(adminPassword, 12);
   const admin = await prisma.user.upsert({
     where: { email: "admin@presidentielle2027.fr" },
     update: {},
@@ -19,6 +20,9 @@ async function main() {
     },
   });
   console.log("✅ Admin user created:", admin.email);
+  if (!process.env.ADMIN_PASSWORD) {
+    console.warn("⚠️  Mot de passe admin par défaut utilisé. Définissez ADMIN_PASSWORD en production.");
+  }
 
   // Create parties
   const en_marche = await prisma.parti.upsert({
@@ -263,6 +267,8 @@ async function main() {
     { candidatId: ciotti.id, date: new Date("2025-10-05"), score: 11, institut: "BVA", marge: 3 },
   ];
 
+  // Delete existing sondages to avoid duplicates on re-seed
+  await prisma.sondage.deleteMany({});
   for (const poll of pollData) {
     await prisma.sondage.create({ data: poll });
   }
@@ -312,6 +318,7 @@ async function main() {
     },
   ];
 
+  await prisma.evenement.deleteMany({});
   for (const event of events) {
     await prisma.evenement.create({ data: event });
   }

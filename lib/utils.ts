@@ -24,7 +24,7 @@ export function timeAgo(date: string | Date): string {
 }
 
 export function daysUntilElection(): number {
-  const electionDate = new Date("2027-04-25");
+  const electionDate = new Date("2027-04-25T00:00:00Z");
   const today = new Date();
   return differenceInDays(electionDate, today);
 }
@@ -46,6 +46,7 @@ export function truncate(text: string, length: number): string {
 }
 
 export function getInitials(nom: string, prenom: string): string {
+  if (!nom || !prenom) return "?";
   return `${prenom.charAt(0)}${nom.charAt(0)}`.toUpperCase();
 }
 

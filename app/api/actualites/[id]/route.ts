@@ -2,17 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 const UpdateSchema = z.object({
-  titre: z.string().min(1).optional(),
-  contenu: z.string().optional(),
-  resume: z.string().nullable().optional(),
-  image: z.string().nullable().optional(),
-  source: z.string().nullable().optional(),
-  sourceUrl: z.string().nullable().optional(),
-  candidatId: z.string().nullable().optional(),
-  tags: z.array(z.string()).optional(),
+  titre: z.string().min(1).max(500).optional(),
+  contenu: z.string().min(1).max(50000).optional(),
+  resume: z.string().max(1000).nullable().optional(),
+  image: z.string().url().max(500).nullable().optional(),
+  source: z.string().max(200).nullable().optional(),
+  sourceUrl: z.string().url().max(500).nullable().optional(),
+  candidatId: z.string().max(50).nullable().optional(),
+  tags: z.array(z.string().max(50)).max(20).optional(),
   published: z.boolean().optional(),
 });
 
@@ -48,7 +49,18 @@ export async function PUT(
     const body = await req.json();
     const data = UpdateSchema.parse(body);
 
+    // Verify candidatId exists if provided
+    if (data.candidatId) {
+      const candidat = await prisma.candidat.findUnique({ where: { id: data.candidatId } });
+      if (!candidat) {
+        return NextResponse.json({ error: "Candidat introuvable" }, { status: 400 });
+      }
+    }
+
     const existing = await prisma.actualite.findUnique({ where: { id: params.id } });
+    if (!existing) {
+      return NextResponse.json({ error: "Article introuvable" }, { status: 404 });
+    }
 
     const actualite = await prisma.actualite.update({
       where: { id: params.id },
@@ -64,7 +76,7 @@ export async function PUT(
         ...(data.published !== undefined && {
           published: data.published,
           publishedAt:
-            data.published && !existing?.publishedAt ? new Date() : existing?.publishedAt,
+            data.published && !existing.publishedAt ? new Date() : existing.publishedAt,
         }),
       },
     });
@@ -72,7 +84,10 @@ export async function PUT(
     return NextResponse.json({ data: actualite });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Données invalides" }, { status: 400 });
+      return NextResponse.json({ error: "Données invalides", details: error.errors }, { status: 400 });
+    }
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+      return NextResponse.json({ error: "Article introuvable" }, { status: 404 });
     }
     console.error("PUT /api/actualites/[id] error:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
@@ -92,6 +107,9 @@ export async function DELETE(
     await prisma.actualite.delete({ where: { id: params.id } });
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+      return NextResponse.json({ error: "Article introuvable" }, { status: 404 });
+    }
     console.error("DELETE /api/actualites/[id] error:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }

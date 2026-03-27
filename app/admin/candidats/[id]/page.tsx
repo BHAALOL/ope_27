@@ -32,7 +32,10 @@ export default function EditCandidatPage({ params }: { params: Promise<{ id: str
 
   useEffect(() => {
     Promise.all([
-      fetch(`/api/candidats/${id}`).then((r) => r.json()),
+      fetch(`/api/candidats/${id}`).then((r) => {
+        if (!r.ok) throw new Error("Candidat introuvable");
+        return r.json();
+      }),
       fetch("/api/partis").then((r) => r.json()),
     ]).then(([candidatData, partisData]) => {
       const c: Candidat = candidatData.data;
@@ -49,6 +52,9 @@ export default function EditCandidatPage({ params }: { params: Promise<{ id: str
         published: c.published,
         featured: c.featured,
       });
+      setFetching(false);
+    }).catch((err) => {
+      setError(err instanceof Error ? err.message : "Erreur de chargement");
       setFetching(false);
     });
   }, [id]);
@@ -70,8 +76,20 @@ export default function EditCandidatPage({ params }: { params: Promise<{ id: str
     try {
       let programme = null;
       let positions = null;
-      if (form.programme.trim()) programme = JSON.parse(form.programme);
-      if (form.positions.trim()) positions = JSON.parse(form.positions);
+      try {
+        if (form.programme.trim()) programme = JSON.parse(form.programme);
+      } catch {
+        setError("Le JSON du programme est invalide");
+        setLoading(false);
+        return;
+      }
+      try {
+        if (form.positions.trim()) positions = JSON.parse(form.positions);
+      } catch {
+        setError("Le JSON des positions est invalide");
+        setLoading(false);
+        return;
+      }
 
       const res = await fetch(`/api/candidats/${id}`, {
         method: "PUT",

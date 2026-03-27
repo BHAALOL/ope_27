@@ -52,8 +52,7 @@ COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/prisma ./prisma
 
 # Entrypoint script: run migrations then start app
-COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-RUN printf '#!/bin/sh\nnode /app/node_modules/prisma/build/index.js migrate deploy\nexec node server.js\n' > /start.sh \
+RUN printf '#!/bin/sh\nnpx prisma migrate deploy\nexec node server.js\n' > /start.sh \
   && chmod +x /start.sh \
   && chown nextjs:nodejs /start.sh
 

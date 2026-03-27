@@ -2,16 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 const UpdateSchema = z.object({
-  nom: z.string().min(1).optional(),
-  sigle: z.string().nullable().optional(),
-  couleur: z.string().nullable().optional(),
-  description: z.string().nullable().optional(),
-  histoire: z.string().nullable().optional(),
-  ideologie: z.string().nullable().optional(),
-  fondation: z.number().int().nullable().optional(),
+  nom: z.string().min(1).max(200).optional(),
+  sigle: z.string().max(20).nullable().optional(),
+  couleur: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Couleur hex invalide").nullable().optional(),
+  description: z.string().max(5000).nullable().optional(),
+  histoire: z.string().max(10000).nullable().optional(),
+  ideologie: z.string().max(200).nullable().optional(),
+  fondation: z.number().int().min(1700).max(new Date().getFullYear()).nullable().optional(),
   published: z.boolean().optional(),
 });
 
@@ -68,7 +69,10 @@ export async function PUT(
     return NextResponse.json({ data: parti });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Données invalides" }, { status: 400 });
+      return NextResponse.json({ error: "Données invalides", details: error.errors }, { status: 400 });
+    }
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+      return NextResponse.json({ error: "Parti introuvable" }, { status: 404 });
     }
     console.error("PUT /api/partis/[id] error:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
@@ -88,6 +92,9 @@ export async function DELETE(
     await prisma.parti.delete({ where: { id: params.id } });
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+      return NextResponse.json({ error: "Parti introuvable" }, { status: 404 });
+    }
     console.error("DELETE /api/partis/[id] error:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }

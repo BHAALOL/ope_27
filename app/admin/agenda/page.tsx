@@ -41,6 +41,10 @@ export default function AdminAgendaPage() {
       .then((data) => {
         setEvenements(data.data || []);
         setLoading(false);
+      })
+      .catch(() => {
+        setError("Erreur lors du chargement des événements");
+        setLoading(false);
       });
   };
 

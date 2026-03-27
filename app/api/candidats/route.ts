@@ -6,12 +6,12 @@ import { slugify } from "@/lib/utils";
 import { z } from "zod";
 
 const CandidatSchema = z.object({
-  prenom: z.string().min(1),
-  nom: z.string().min(1),
+  prenom: z.string().min(1).max(100),
+  nom: z.string().min(1).max(100),
   age: z.number().int().min(18).max(120).nullable().optional(),
-  photo: z.string().url().nullable().optional(),
-  partiId: z.string().nullable().optional(),
-  biographie: z.string().nullable().optional(),
+  photo: z.string().url().max(500).nullable().optional(),
+  partiId: z.string().max(50).nullable().optional(),
+  biographie: z.string().max(10000).nullable().optional(),
   programme: z.record(z.unknown()).nullable().optional(),
   positions: z.record(z.unknown()).nullable().optional(),
   published: z.boolean().optional().default(false),
@@ -49,9 +49,15 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const data = CandidatSchema.parse(body);
 
-    const slug = slugify(`${data.prenom}-${data.nom}`);
+    // Verify partiId exists if provided
+    if (data.partiId) {
+      const parti = await prisma.parti.findUnique({ where: { id: data.partiId } });
+      if (!parti) {
+        return NextResponse.json({ error: "Parti introuvable" }, { status: 400 });
+      }
+    }
 
-    // Make slug unique if needed
+    const slug = slugify(`${data.prenom}-${data.nom}`);
     const existing = await prisma.candidat.findUnique({ where: { slug } });
     const finalSlug = existing ? `${slug}-${Date.now()}` : slug;
 
@@ -64,8 +70,8 @@ export async function POST(req: NextRequest) {
         photo: data.photo ?? null,
         partiId: data.partiId ?? null,
         biographie: data.biographie ?? null,
-        programme: data.programme ? JSON.parse(JSON.stringify(data.programme)) : undefined,
-        positions: data.positions ? JSON.parse(JSON.stringify(data.positions)) : undefined,
+        programme: data.programme ? (data.programme as Record<string, string>) : undefined,
+        positions: data.positions ? (data.positions as Record<string, string>) : undefined,
         published: data.published ?? false,
         featured: data.featured ?? false,
       },

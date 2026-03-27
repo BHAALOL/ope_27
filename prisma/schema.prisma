@@ -40,6 +40,8 @@ model Candidat {
   updatedAt   DateTime    @updatedAt
   sondages    Sondage[]
   actualites  Actualite[]
+
+  @@index([partiId])
 }
 
 model Parti {
@@ -69,6 +71,9 @@ model Sondage {
   marge       Float?
   source      String?
   createdAt   DateTime  @default(now())
+
+  @@index([candidatId])
+  @@index([date])
 }
 
 model Actualite {
@@ -87,6 +92,9 @@ model Actualite {
   tags        String[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  @@index([candidatId])
+  @@index([publishedAt])
 }
 
 model Evenement {
@@ -101,6 +109,8 @@ model Evenement {
   lienInscription String?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+
+  @@index([dateDebut])
 }
 
 enum TypeEvenement {

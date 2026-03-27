@@ -6,8 +6,8 @@ import { z } from "zod";
 
 const RequestSchema = z.object({
   type: z.enum(["candidat", "parti"]),
-  name: z.string().min(1),
-  additionalContext: z.string().optional(),
+  name: z.string().min(1).max(200),
+  additionalContext: z.string().max(2000).optional(),
 });
 
 function buildCandidatPrompt(name: string, context?: string): string {
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
         : buildPartiPrompt(name, additionalContext);
 
     const message = await client.messages.create({
-      model: "claude-opus-4-5",
+      model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514",
       max_tokens: 2048,
       messages: [
         {
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
     });
 
     const content = message.content[0];
-    if (content.type !== "text") {
+    if (!content || content.type !== "text") {
       throw new Error("Réponse inattendue de l'API");
     }
 
@@ -131,8 +131,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error:
-          error instanceof Error ? error.message : "Erreur lors de la génération",
+        error: "Erreur lors de la génération IA",
       },
       { status: 500 }
     );

@@ -6,14 +6,14 @@ import { slugify } from "@/lib/utils";
 import { z } from "zod";
 
 const PartiSchema = z.object({
-  nom: z.string().min(1),
-  sigle: z.string().nullable().optional(),
-  logo: z.string().nullable().optional(),
-  couleur: z.string().nullable().optional(),
-  description: z.string().nullable().optional(),
-  histoire: z.string().nullable().optional(),
-  ideologie: z.string().nullable().optional(),
-  fondation: z.number().int().nullable().optional(),
+  nom: z.string().min(1).max(200),
+  sigle: z.string().max(20).nullable().optional(),
+  logo: z.string().url().max(500).nullable().optional(),
+  couleur: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Couleur hex invalide").nullable().optional(),
+  description: z.string().max(5000).nullable().optional(),
+  histoire: z.string().max(10000).nullable().optional(),
+  ideologie: z.string().max(200).nullable().optional(),
+  fondation: z.number().int().min(1700).max(new Date().getFullYear()).nullable().optional(),
   published: z.boolean().optional().default(false),
 });
 
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ data: parti }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Données invalides" }, { status: 400 });
+      return NextResponse.json({ error: "Données invalides", details: error.errors }, { status: 400 });
     }
     console.error("POST /api/partis error:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

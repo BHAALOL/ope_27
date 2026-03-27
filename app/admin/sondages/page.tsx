@@ -30,6 +30,9 @@ export default function AdminSondagesPage() {
       setSondages(sondagesData.data || []);
       setCandidats(candidatsData.data || []);
       setLoading(false);
+    }).catch(() => {
+      setError("Erreur lors du chargement des données");
+      setLoading(false);
     });
   };
 
@@ -227,6 +230,7 @@ export default function AdminSondagesPage() {
                       <button
                         onClick={() => handleDelete(s.id)}
                         className="p-1.5 rounded-lg text-red-400 hover:bg-red-500/10 transition-all"
+                        aria-label="Supprimer ce sondage"
                       >
                         <Trash2 size={14} />
                       </button>

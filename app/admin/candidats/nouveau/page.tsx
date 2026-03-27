@@ -55,12 +55,14 @@ export default function NouveauCandidatPage() {
         if (form.programme.trim()) programme = JSON.parse(form.programme);
       } catch {
         setError("Le JSON du programme est invalide");
+        setLoading(false);
         return;
       }
       try {
         if (form.positions.trim()) positions = JSON.parse(form.positions);
       } catch {
         setError("Le JSON des positions est invalide");
+        setLoading(false);
         return;
       }
 

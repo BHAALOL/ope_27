@@ -29,7 +29,10 @@ export default function EditPartiPage({ params }: { params: Promise<{ id: string
 
   useEffect(() => {
     fetch(`/api/partis/${id}`)
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error("Parti introuvable");
+        return r.json();
+      })
       .then((data) => {
         const p: Parti = data.data;
         setForm({
@@ -42,6 +45,10 @@ export default function EditPartiPage({ params }: { params: Promise<{ id: string
           histoire: p.histoire || "",
           published: p.published,
         });
+        setFetching(false);
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : "Erreur de chargement");
         setFetching(false);
       });
   }, [id]);
