@@ -8,6 +8,7 @@ import { z } from "zod";
 const UpdateSchema = z.object({
   nom: z.string().min(1).max(200).optional(),
   sigle: z.string().max(20).nullable().optional(),
+  logo: z.string().url().max(500).nullable().optional(),
   couleur: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Couleur hex invalide").nullable().optional(),
   description: z.string().max(5000).nullable().optional(),
   histoire: z.string().max(10000).nullable().optional(),
@@ -57,6 +58,7 @@ export async function PUT(
       data: {
         ...(data.nom !== undefined && { nom: data.nom }),
         ...(data.sigle !== undefined && { sigle: data.sigle }),
+        ...(data.logo !== undefined && { logo: data.logo }),
         ...(data.couleur !== undefined && { couleur: data.couleur }),
         ...(data.description !== undefined && { description: data.description }),
         ...(data.histoire !== undefined && { histoire: data.histoire }),

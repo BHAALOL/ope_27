@@ -1,7 +1,10 @@
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { Building2, Users } from "lucide-react";
 import type { Metadata } from "next";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Partis politiques",
@@ -64,16 +67,28 @@ export default async function PartisPage() {
                     <div className="p-6">
                       {/* Logo / Sigle */}
                       <div className="flex items-start justify-between mb-4">
-                        <div
-                          className="w-14 h-14 rounded-xl flex items-center justify-center text-xl font-bold font-display"
-                          style={{
-                            backgroundColor: `${color}20`,
-                            color,
-                            border: `1px solid ${color}30`,
-                          }}
-                        >
-                          {parti.sigle?.substring(0, 2) || parti.nom.substring(0, 2)}
-                        </div>
+                        {parti.logo ? (
+                          <div className="w-14 h-14 rounded-xl overflow-hidden border" style={{ borderColor: `${color}30` }}>
+                            <Image
+                              src={parti.logo}
+                              alt={parti.nom}
+                              width={56}
+                              height={56}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div
+                            className="w-14 h-14 rounded-xl flex items-center justify-center text-xl font-bold font-display"
+                            style={{
+                              backgroundColor: `${color}20`,
+                              color,
+                              border: `1px solid ${color}30`,
+                            }}
+                          >
+                            {parti.sigle?.substring(0, 2) || parti.nom.substring(0, 2)}
+                          </div>
+                        )}
                         {parti.ideologie && (
                           <span className="text-xs px-2.5 py-1 rounded-full glass text-gray-400 border border-white/10">
                             {parti.ideologie}

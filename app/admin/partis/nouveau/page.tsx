@@ -15,6 +15,7 @@ export default function NouveauPartiPage() {
   const [form, setForm] = useState({
     nom: "",
     sigle: "",
+    logo: "",
     couleur: "#6366f1",
     ideologie: "",
     fondation: "",
@@ -46,6 +47,7 @@ export default function NouveauPartiPage() {
         body: JSON.stringify({
           nom: form.nom,
           sigle: form.sigle || null,
+          logo: form.logo || null,
           couleur: form.couleur || null,
           ideologie: form.ideologie || null,
           fondation: form.fondation ? parseInt(form.fondation) : null,
@@ -126,6 +128,16 @@ export default function NouveauPartiPage() {
                 onChange={(e) => setForm({ ...form, sigle: e.target.value })}
                 className={inputClass}
                 placeholder="LREM"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className={labelClass}>URL du logo / image</label>
+              <input
+                type="url"
+                value={form.logo}
+                onChange={(e) => setForm({ ...form, logo: e.target.value })}
+                className={inputClass}
+                placeholder="https://exemple.com/logo.png"
               />
             </div>
             <div>
