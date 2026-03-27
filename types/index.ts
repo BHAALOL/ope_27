@@ -105,6 +105,7 @@ export interface ChartDataPoint {
 }
 
 export type AIGenerateType = 'candidat' | 'parti';
+export type AIProvider = 'anthropic' | 'openai';
 
 export interface NewsSearchResult {
   titre: string;
@@ -129,11 +130,13 @@ export interface AIGenerateRequest {
   type: AIGenerateType;
   name: string;
   additionalContext?: string;
+  provider?: AIProvider;
 }
 
 export interface AIGenerateResponse {
   success: boolean;
   data?: Record<string, unknown>;
+  provider?: AIProvider;
   error?: string;
 }
 
