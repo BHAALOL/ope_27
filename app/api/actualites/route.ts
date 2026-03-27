@@ -22,15 +22,16 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const tag = searchParams.get("tag");
     const candidatId = searchParams.get("candidatId");
+    const onlyPublished = searchParams.get("published") !== "false";
 
     const actualites = await prisma.actualite.findMany({
       where: {
-        published: true,
+        ...(onlyPublished ? { published: true } : {}),
         ...(tag ? { tags: { has: tag } } : {}),
         ...(candidatId ? { candidatId } : {}),
       },
       include: { candidat: { include: { parti: true } } },
-      orderBy: { publishedAt: "desc" },
+      orderBy: { createdAt: "desc" },
     });
 
     return NextResponse.json({ data: actualites });

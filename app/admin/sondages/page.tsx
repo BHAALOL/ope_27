@@ -25,7 +25,7 @@ export default function AdminSondagesPage() {
   const fetchData = () => {
     Promise.all([
       fetch("/api/sondages").then((r) => r.json()),
-      fetch("/api/candidats").then((r) => r.json()),
+      fetch("/api/candidats?published=false").then((r) => r.json()),
     ]).then(([sondagesData, candidatsData]) => {
       setSondages(sondagesData.data || []);
       setCandidats(candidatsData.data || []);

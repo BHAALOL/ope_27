@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { Users, Plus, Pencil } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 async function getCandidats() {
   try {
     return await prisma.candidat.findMany({

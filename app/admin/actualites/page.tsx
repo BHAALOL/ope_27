@@ -33,8 +33,8 @@ export default function AdminActualitesPage() {
 
   const fetchData = () => {
     Promise.all([
-      fetch("/api/actualites").then((r) => r.json()),
-      fetch("/api/candidats").then((r) => r.json()),
+      fetch("/api/actualites?published=false").then((r) => r.json()),
+      fetch("/api/candidats?published=false").then((r) => r.json()),
     ]).then(([aData, cData]) => {
       setActualites(aData.data || []);
       setCandidats(cData.data || []);
