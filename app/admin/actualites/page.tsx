@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Newspaper, Plus, Pencil, Trash2 } from "lucide-react";
+import { Newspaper, Plus, Pencil, Trash2, Globe } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { NewsSearcher } from "@/components/admin/NewsSearcher";
 import { formatDate } from "@/lib/utils";
 import type { Actualite, Candidat } from "@/types";
 
@@ -12,6 +13,7 @@ export default function AdminActualitesPage() {
   const [candidats, setCandidats] = useState<Candidat[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [editId, setEditId] = useState<string | null>(null);
@@ -106,6 +108,34 @@ export default function AdminActualitesPage() {
     fetchData();
   };
 
+  const handleImportNews = (news: { titre: string; resume: string; contenu: string; source: string; sourceUrl: string; tags: string[]; candidatMentioned?: string }) => {
+    // Find matching candidat by name
+    let matchedCandidatId = "";
+    if (news.candidatMentioned) {
+      const match = candidats.find((c) => {
+        const fullName = `${c.prenom} ${c.nom}`.toLowerCase();
+        return news.candidatMentioned!.toLowerCase().includes(fullName) ||
+               fullName.includes(news.candidatMentioned!.toLowerCase());
+      });
+      if (match) matchedCandidatId = match.id;
+    }
+
+    setForm({
+      titre: news.titre,
+      contenu: news.contenu,
+      resume: news.resume,
+      source: news.source,
+      sourceUrl: news.sourceUrl,
+      image: "",
+      candidatId: matchedCandidatId,
+      tags: news.tags.join(", "),
+      published: false,
+    });
+    setEditId(null);
+    setShowForm(true);
+    setShowSearch(false);
+  };
+
   const inputClass = "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 transition-all text-sm";
 
   return (
@@ -118,14 +148,35 @@ export default function AdminActualitesPage() {
           </h1>
           <p className="text-gray-400 mt-1">{actualites.length} article(s)</p>
         </div>
-        <Button
-          onClick={() => { setShowForm(!showForm); setEditId(null); setForm(emptyForm); }}
-          className="flex items-center gap-2"
-        >
-          <Plus size={16} />
-          Nouvel article
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={() => { setShowSearch(!showSearch); setShowForm(false); }}
+            variant="secondary"
+            className="flex items-center gap-2 bg-emerald-500/20 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/30"
+          >
+            <Globe size={16} />
+            Rechercher des news
+          </Button>
+          <Button
+            onClick={() => { setShowForm(!showForm); setShowSearch(false); setEditId(null); setForm(emptyForm); }}
+            className="flex items-center gap-2"
+          >
+            <Plus size={16} />
+            Nouvel article
+          </Button>
+        </div>
       </div>
+
+      {/* Search Panel */}
+      {showSearch && (
+        <div className="glass rounded-2xl p-6 mb-8">
+          <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-5 flex items-center gap-2">
+            <Globe size={14} />
+            Recherche d&apos;actualités en temps réel
+          </h2>
+          <NewsSearcher onImport={handleImportNews} />
+        </div>
+      )}
 
       {/* Form */}
       {showForm && (

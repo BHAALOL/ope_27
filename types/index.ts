@@ -105,16 +105,38 @@ export interface ChartDataPoint {
 }
 
 export type AIGenerateType = 'candidat' | 'parti';
+export type AIProvider = 'anthropic' | 'openai';
+
+export interface NewsSearchResult {
+  titre: string;
+  resume: string;
+  contenu: string;
+  source: string;
+  sourceUrl: string;
+  tags: string[];
+  candidatMentioned?: string;
+  publishedAt: string;
+}
+
+export interface NewsSearchResponse {
+  success: boolean;
+  results?: NewsSearchResult[];
+  query?: string;
+  searchedAt?: string;
+  error?: string;
+}
 
 export interface AIGenerateRequest {
   type: AIGenerateType;
   name: string;
   additionalContext?: string;
+  provider?: AIProvider;
 }
 
 export interface AIGenerateResponse {
   success: boolean;
   data?: Record<string, unknown>;
+  provider?: AIProvider;
   error?: string;
 }
 

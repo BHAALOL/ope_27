@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { z } from "zod";
 
 const RequestSchema = z.object({
   type: z.enum(["candidat", "parti"]),
   name: z.string().min(1).max(200),
   additionalContext: z.string().max(2000).optional(),
+  provider: z.enum(["anthropic", "openai"]).optional().default("anthropic"),
 });
 
 function buildCandidatPrompt(name: string, context?: string): string {
@@ -61,6 +63,65 @@ Réponds UNIQUEMENT avec un objet JSON valide (sans markdown, sans commentaires)
 Les informations doivent être précises et basées sur des faits réels si le parti existe.`;
 }
 
+function cleanJsonResponse(text: string): string {
+  return text
+    .replace(/```json\n?/g, "")
+    .replace(/```\n?/g, "")
+    .trim();
+}
+
+async function generateWithAnthropic(
+  prompt: string
+): Promise<string> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error("Clé API Anthropic non configurée (ANTHROPIC_API_KEY)");
+  }
+
+  const client = new Anthropic({ apiKey });
+  const message = await client.messages.create({
+    model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514",
+    max_tokens: 2048,
+    messages: [{ role: "user", content: prompt }],
+  });
+
+  const content = message.content[0];
+  if (!content || content.type !== "text") {
+    throw new Error("Réponse inattendue de l'API Anthropic");
+  }
+  return content.text;
+}
+
+async function generateWithOpenAI(
+  prompt: string
+): Promise<string> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("Clé API OpenAI non configurée (OPENAI_API_KEY)");
+  }
+
+  const client = new OpenAI({ apiKey });
+  const completion = await client.chat.completions.create({
+    model: process.env.OPENAI_MODEL || "gpt-4.1",
+    max_tokens: 2048,
+    messages: [
+      {
+        role: "system",
+        content:
+          "Tu es un expert en politique française. Tu réponds uniquement en JSON valide, sans markdown ni commentaires.",
+      },
+      { role: "user", content: prompt },
+    ],
+    temperature: 0.7,
+  });
+
+  const content = completion.choices[0]?.message?.content;
+  if (!content) {
+    throw new Error("Réponse vide de l'API OpenAI");
+  }
+  return content;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -69,57 +130,35 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { type, name, additionalContext } = RequestSchema.parse(body);
-
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json(
-        { success: false, error: "Clé API Anthropic non configurée" },
-        { status: 500 }
-      );
-    }
-
-    const client = new Anthropic({ apiKey });
+    const { type, name, additionalContext, provider } =
+      RequestSchema.parse(body);
 
     const prompt =
       type === "candidat"
         ? buildCandidatPrompt(name, additionalContext)
         : buildPartiPrompt(name, additionalContext);
 
-    const message = await client.messages.create({
-      model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514",
-      max_tokens: 2048,
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-    });
-
-    const content = message.content[0];
-    if (!content || content.type !== "text") {
-      throw new Error("Réponse inattendue de l'API");
+    let rawText: string;
+    if (provider === "openai") {
+      rawText = await generateWithOpenAI(prompt);
+    } else {
+      rawText = await generateWithAnthropic(prompt);
     }
 
     // Parse the JSON response
     let data: Record<string, unknown>;
     try {
-      // Clean up potential markdown code blocks
-      const text = content.text
-        .replace(/```json\n?/g, "")
-        .replace(/```\n?/g, "")
-        .trim();
+      const text = cleanJsonResponse(rawText);
       data = JSON.parse(text);
     } catch {
-      console.error("Failed to parse AI response:", content.text);
+      console.error("Failed to parse AI response:", rawText);
       return NextResponse.json(
         { success: false, error: "Impossible de parser la réponse de l'IA" },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ success: true, data });
+    return NextResponse.json({ success: true, data, provider });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -131,7 +170,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: "Erreur lors de la génération IA",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Erreur lors de la génération IA",
       },
       { status: 500 }
     );
