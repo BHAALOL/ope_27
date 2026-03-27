@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/Button";
 import { AIGenerator } from "@/components/admin/AIGenerator";
 import type { Parti } from "@/types";
 
-export default function EditPartiPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function EditPartiPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
