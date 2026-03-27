@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { Building2, Plus, Pencil } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 async function getPartis() {
   try {
     return await prisma.parti.findMany({
