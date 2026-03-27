@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { Building2, Plus, Pencil } from "lucide-react";
 import { formatDate } from "@/lib/utils";
@@ -77,12 +78,18 @@ export default async function AdminPartisPage() {
                     <tr key={p.id} className="hover:bg-white/3 transition-colors">
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-3">
-                          <div
-                            className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold"
-                            style={{ backgroundColor: `${color}20`, color }}
-                          >
-                            {p.sigle?.substring(0, 2) || p.nom.substring(0, 2)}
-                          </div>
+                          {p.logo ? (
+                            <div className="w-8 h-8 rounded-lg overflow-hidden">
+                              <Image src={p.logo} alt={p.nom} width={32} height={32} className="w-full h-full object-cover" />
+                            </div>
+                          ) : (
+                            <div
+                              className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold"
+                              style={{ backgroundColor: `${color}20`, color }}
+                            >
+                              {p.sigle?.substring(0, 2) || p.nom.substring(0, 2)}
+                            </div>
+                          )}
                           <div>
                             <p className="text-sm font-medium text-white">{p.sigle || p.nom}</p>
                             <p className="text-xs text-gray-500">{p.sigle ? p.nom : `/${p.slug}`}</p>

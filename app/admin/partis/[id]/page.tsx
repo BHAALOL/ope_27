@@ -19,6 +19,7 @@ export default function EditPartiPage({ params }: { params: { id: string } }) {
   const [form, setForm] = useState({
     nom: "",
     sigle: "",
+    logo: "",
     couleur: "#6366f1",
     ideologie: "",
     fondation: "",
@@ -38,6 +39,7 @@ export default function EditPartiPage({ params }: { params: { id: string } }) {
         setForm({
           nom: p.nom,
           sigle: p.sigle || "",
+          logo: p.logo || "",
           couleur: p.couleur || "#6366f1",
           ideologie: p.ideologie || "",
           fondation: p.fondation ? String(p.fondation) : "",
@@ -76,6 +78,7 @@ export default function EditPartiPage({ params }: { params: { id: string } }) {
         body: JSON.stringify({
           nom: form.nom,
           sigle: form.sigle || null,
+          logo: form.logo || null,
           couleur: form.couleur || null,
           ideologie: form.ideologie || null,
           fondation: form.fondation ? parseInt(form.fondation) : null,
@@ -160,6 +163,10 @@ export default function EditPartiPage({ params }: { params: { id: string } }) {
             <div>
               <label className={labelClass}>Sigle</label>
               <input type="text" value={form.sigle} onChange={(e) => setForm({ ...form, sigle: e.target.value })} className={inputClass} />
+            </div>
+            <div className="sm:col-span-2">
+              <label className={labelClass}>URL du logo / image</label>
+              <input type="url" value={form.logo} onChange={(e) => setForm({ ...form, logo: e.target.value })} className={inputClass} placeholder="https://exemple.com/logo.png" />
             </div>
             <div>
               <label className={labelClass}>Idéologie</label>
