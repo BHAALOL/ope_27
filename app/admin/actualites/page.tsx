@@ -104,8 +104,13 @@ export default function AdminActualitesPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Supprimer cet article ?")) return;
-    await fetch(`/api/actualites/${id}`, { method: "DELETE" });
-    fetchData();
+    try {
+      const res = await fetch(`/api/actualites/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Erreur lors de la suppression");
+      fetchData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur lors de la suppression");
+    }
   };
 
   const handleImportNews = (news: { titre: string; resume: string; contenu: string; source: string; sourceUrl: string; tags: string[]; candidatMentioned?: string }) => {

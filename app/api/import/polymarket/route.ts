@@ -57,7 +57,12 @@ async function identifyPartiesWithAnthropic(
   if (!content || content.type !== "text") {
     throw new Error("Réponse inattendue de l'API Anthropic");
   }
-  return JSON.parse(cleanJsonResponse(content.text));
+  try {
+    return JSON.parse(cleanJsonResponse(content.text));
+  } catch {
+    console.error("Failed to parse Anthropic response:", content.text.substring(0, 500));
+    throw new Error("Impossible de parser la réponse de l'IA Anthropic");
+  }
 }
 
 async function identifyPartiesWithOpenAI(
@@ -86,7 +91,12 @@ async function identifyPartiesWithOpenAI(
 
   const content = completion.choices[0]?.message?.content;
   if (!content) throw new Error("Réponse vide de l'API OpenAI");
-  return JSON.parse(cleanJsonResponse(content));
+  try {
+    return JSON.parse(cleanJsonResponse(content));
+  } catch {
+    console.error("Failed to parse OpenAI response:", content.substring(0, 500));
+    throw new Error("Impossible de parser la réponse de l'IA OpenAI");
+  }
 }
 
 export async function POST(req: NextRequest) {

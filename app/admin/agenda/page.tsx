@@ -85,8 +85,13 @@ export default function AdminAgendaPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Supprimer cet événement ?")) return;
-    await fetch(`/api/agenda?id=${id}`, { method: "DELETE" });
-    fetchData();
+    try {
+      const res = await fetch(`/api/agenda?id=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Erreur lors de la suppression");
+      fetchData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur lors de la suppression");
+    }
   };
 
   const inputClass = "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 transition-all text-sm";

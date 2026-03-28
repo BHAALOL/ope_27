@@ -2,7 +2,16 @@
 const nextConfig = {
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "**" },
+      { protocol: "https", hostname: "upload.wikimedia.org" },
+      { protocol: "https", hostname: "commons.wikimedia.org" },
+      { protocol: "https", hostname: "www.gouvernement.fr" },
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "res.cloudinary.com" },
+      // Add more trusted domains as needed
+      ...(process.env.NEXT_PUBLIC_ALLOWED_IMAGE_DOMAINS || "")
+        .split(",")
+        .filter(Boolean)
+        .map((hostname) => ({ protocol: "https", hostname: hostname.trim() })),
     ],
   },
   output: "standalone",
@@ -23,6 +32,19 @@ const nextConfig = {
           {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
+          },
+          { key: "X-XSS-Protection", value: "1; mode=block" },
+          {
+            key: "Content-Security-Policy",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "font-src 'self' https://fonts.gstatic.com",
+              "img-src 'self' data: https: blob:",
+              "connect-src 'self' https://gamma-api.polymarket.com https://api.perplexity.ai",
+              "frame-ancestors 'none'",
+            ].join("; "),
           },
         ],
       },

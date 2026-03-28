@@ -8,11 +8,13 @@ services:
     environment:
       POSTGRES_DB: presidentielle2027
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres2027}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    # In production, do NOT expose the DB port externally.
+    # Uncomment for local development only:
+    # ports:
+    #   - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d presidentielle2027"]
       interval: 10s
@@ -25,9 +27,9 @@ services:
       dockerfile: Dockerfile
     container_name: presidentielle2027_migrate
     command: >
-      sh -c "npx prisma migrate deploy && npx prisma db seed"
+      sh -c "npx prisma migrate deploy"
     environment:
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres2027}@db:5432/presidentielle2027
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/presidentielle2027
     depends_on:
       db:
         condition: service_healthy
@@ -40,18 +42,26 @@ services:
     container_name: presidentielle2027_app
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${APP_PORT:-3000}:3000"
     environment:
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres2027}@db:5432/presidentielle2027
-      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/presidentielle2027
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      PERPLEXITY_API_KEY: ${PERPLEXITY_API_KEY:-}
       NODE_ENV: production
     depends_on:
       db:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 15s
+      retries: 3
 
 volumes:
   postgres_data:

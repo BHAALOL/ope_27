@@ -26,7 +26,8 @@ async function getHomeData() {
       }),
     ]);
     return { candidats, sondages, actualites };
-  } catch {
+  } catch (error) {
+    console.error("Failed to load home page data:", error);
     return { candidats: [], sondages: [], actualites: [] };
   }
 }

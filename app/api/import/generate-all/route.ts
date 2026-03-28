@@ -108,7 +108,12 @@ async function generateContent(
     provider === "openai"
       ? await generateWithOpenAI(prompt)
       : await generateWithAnthropic(prompt);
-  return JSON.parse(cleanJsonResponse(rawText));
+  try {
+    return JSON.parse(cleanJsonResponse(rawText));
+  } catch {
+    console.error("Failed to parse AI response:", rawText.substring(0, 500));
+    throw new Error("Impossible de parser la réponse de l'IA");
+  }
 }
 
 export async function POST(req: NextRequest) {

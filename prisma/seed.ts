@@ -7,7 +7,10 @@ async function main() {
   console.log("🌱 Seeding database...");
 
   // Create admin user
-  const adminPassword = process.env.ADMIN_PASSWORD || "admin2027!";
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword) {
+    throw new Error("ADMIN_PASSWORD environment variable is required. Set it before running seed.");
+  }
   const hashedPassword = await bcrypt.hash(adminPassword, 12);
   const admin = await prisma.user.upsert({
     where: { email: "admin@presidentielle2027.fr" },
@@ -20,9 +23,7 @@ async function main() {
     },
   });
   console.log("✅ Admin user created:", admin.email);
-  if (!process.env.ADMIN_PASSWORD) {
-    console.warn("⚠️  Mot de passe admin par défaut utilisé. Définissez ADMIN_PASSWORD en production.");
-  }
+
 
   // Create parties
   const en_marche = await prisma.parti.upsert({
@@ -412,7 +413,7 @@ Sur le terrain économique, l'Elysée a également laissé filtrer des pistes su
   console.log("\n🎉 Database seeded successfully!");
   console.log("\n📋 Admin credentials:");
   console.log("   Email: admin@presidentielle2027.fr");
-  console.log("   Password: admin2027!");
+  console.log("   Password: (value of ADMIN_PASSWORD env var)");
 }
 
 main()
