@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { checkRateLimit, getRateLimitKey } from "@/lib/rate-limit";
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { z } from "zod";
@@ -102,7 +103,7 @@ async function generateWithOpenAI(
 
   const client = new OpenAI({ apiKey });
   const completion = await client.chat.completions.create({
-    model: process.env.OPENAI_MODEL || "gpt-4.1",
+    model: process.env.OPENAI_MODEL || "gpt-4o",
     max_tokens: 2048,
     messages: [
       {
@@ -127,6 +128,16 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
+    // Rate limit: 10 requests per minute per IP
+    const rlKey = getRateLimitKey(req, "ai-generate");
+    const rl = checkRateLimit(rlKey, { maxRequests: 10, windowMs: 60_000 });
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "Trop de requêtes. Réessayez dans quelques instants." },
+        { status: 429, headers: { "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+      );
     }
 
     const body = await req.json();

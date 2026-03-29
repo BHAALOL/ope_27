@@ -4,9 +4,16 @@ const nextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "**" },
     ],
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 60,
   },
   output: "standalone",
   poweredByHeader: false,
+  compress: true,
+  reactStrictMode: true,
+  experimental: {
+    optimizePackageImports: ["lucide-react", "date-fns", "recharts"],
+  },
   async headers() {
     return [
       {
@@ -23,6 +30,10 @@ const nextConfig = {
           {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
+          },
+          {
+            key: "Content-Security-Policy",
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https:; frame-ancestors 'none';",
           },
         ],
       },

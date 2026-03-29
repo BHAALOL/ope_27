@@ -27,7 +27,6 @@ yarn-error.log*
 
 # Node modules
 node_modules/
-package-lock.json
 
 # Next.js generated
 next-env.d.ts

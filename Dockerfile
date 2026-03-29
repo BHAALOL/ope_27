@@ -3,8 +3,8 @@ FROM node:20-alpine AS deps
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 
-COPY package.json ./
-RUN npm install --legacy-peer-deps
+COPY package.json package-lock.json* ./
+RUN npm ci --legacy-peer-deps || npm install --legacy-peer-deps
 
 # Stage 2: Builder
 FROM node:20-alpine AS builder
@@ -52,7 +52,7 @@ COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/prisma ./prisma
 
 # Entrypoint script: run migrations then start app
-RUN printf '#!/bin/sh\nnpx prisma migrate deploy\nexec node server.js\n' > /start.sh \
+RUN printf '#!/bin/sh\nset -e\nnpx prisma migrate deploy || npx prisma db push --skip-generate\nexec node server.js\n' > /start.sh \
   && chmod +x /start.sh \
   && chown nextjs:nodejs /start.sh
 
