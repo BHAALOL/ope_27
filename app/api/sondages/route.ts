@@ -20,7 +20,9 @@ export async function GET(_req: NextRequest) {
       include: { candidat: { include: { parti: true } } },
       orderBy: { date: "desc" },
     });
-    return NextResponse.json({ data: sondages });
+    const response = NextResponse.json({ data: sondages });
+    response.headers.set("Cache-Control", "public, s-maxage=60, stale-while-revalidate=120");
+    return response;
   } catch (error) {
     console.error("GET /api/sondages error:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

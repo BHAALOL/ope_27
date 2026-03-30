@@ -1,0 +1,45 @@
+/**
+ * Environment variable validation for production readiness.
+ * Validates required variables at startup.
+ */
+
+function getRequiredEnv(key: string): string {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(`❌ Missing required environment variable: ${key}`);
+  }
+  return value;
+}
+
+export function validateEnv() {
+  const errors: string[] = [];
+
+  // Required for core functionality
+  if (!process.env.DATABASE_URL) {
+    errors.push("DATABASE_URL is required");
+  }
+
+  if (!process.env.NEXTAUTH_SECRET) {
+    errors.push("NEXTAUTH_SECRET is required");
+  } else if (process.env.NEXTAUTH_SECRET.length < 32) {
+    errors.push("NEXTAUTH_SECRET must be at least 32 characters");
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    if (!process.env.NEXTAUTH_URL) {
+      errors.push("NEXTAUTH_URL is required in production");
+    }
+
+    if (process.env.NEXTAUTH_SECRET === "your-nextauth-secret-min-32-chars-change-in-production") {
+      errors.push("NEXTAUTH_SECRET must be changed from the default value in production");
+    }
+  }
+
+  if (errors.length > 0) {
+    console.error("❌ Environment validation failed:");
+    errors.forEach((e) => console.error(`   - ${e}`));
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(`Environment validation failed: ${errors.join(", ")}`);
+    }
+  }
+}

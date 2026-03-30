@@ -412,7 +412,7 @@ Sur le terrain économique, l'Elysée a également laissé filtrer des pistes su
   console.log("\n🎉 Database seeded successfully!");
   console.log("\n📋 Admin credentials:");
   console.log("   Email: admin@presidentielle2027.fr");
-  console.log("   Password: admin2027!");
+  console.log(`   Password: ${process.env.ADMIN_PASSWORD ? "(set via ADMIN_PASSWORD env var)" : "admin2027! (⚠️ default — change in production!)"}`);
 }
 
 main()

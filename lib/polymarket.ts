@@ -73,7 +73,12 @@ export async function fetchPolymarketElection(): Promise<PolymarketEventData> {
   const outcomes: PolymarketOutcome[] = event.markets
     .filter((m) => m.active && !m.closed)
     .map((market) => {
-      const prices = JSON.parse(market.outcomePrices || "[]") as string[];
+      let prices: string[] = [];
+      try {
+        prices = JSON.parse(market.outcomePrices || "[]") as string[];
+      } catch {
+        prices = [];
+      }
       const volume = parseFloat(market.volume || "0");
       totalVolume += volume;
 

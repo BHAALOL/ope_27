@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { SondagesCharts } from "@/components/sondages/SondagesCharts";
+
+export const revalidate = 120;
 import { PolymarketSection } from "@/components/sondages/PolymarketSection";
 import { TrendingUp } from "lucide-react";
 import { formatDate } from "@/lib/utils";

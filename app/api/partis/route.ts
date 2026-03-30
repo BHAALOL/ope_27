@@ -23,7 +23,9 @@ export async function GET(_req: NextRequest) {
       include: { candidats: { where: { published: true }, select: { id: true } } },
       orderBy: { nom: "asc" },
     });
-    return NextResponse.json({ data: partis });
+    const response = NextResponse.json({ data: partis });
+    response.headers.set("Cache-Control", "public, s-maxage=60, stale-while-revalidate=120");
+    return response;
   } catch (error) {
     console.error("GET /api/partis error:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

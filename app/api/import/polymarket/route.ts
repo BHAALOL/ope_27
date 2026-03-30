@@ -57,7 +57,11 @@ async function identifyPartiesWithAnthropic(
   if (!content || content.type !== "text") {
     throw new Error("Réponse inattendue de l'API Anthropic");
   }
-  return JSON.parse(cleanJsonResponse(content.text));
+  try {
+    return JSON.parse(cleanJsonResponse(content.text));
+  } catch {
+    throw new Error("Impossible de parser la réponse IA (Anthropic)");
+  }
 }
 
 async function identifyPartiesWithOpenAI(
@@ -86,7 +90,11 @@ async function identifyPartiesWithOpenAI(
 
   const content = completion.choices[0]?.message?.content;
   if (!content) throw new Error("Réponse vide de l'API OpenAI");
-  return JSON.parse(cleanJsonResponse(content));
+  try {
+    return JSON.parse(cleanJsonResponse(content));
+  } catch {
+    throw new Error("Impossible de parser la réponse IA (OpenAI)");
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -214,10 +222,12 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error("POST /api/import/polymarket error:", error);
+    const isDevEnv = process.env.NODE_ENV === "development";
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : "Erreur lors de l'import",
+        error: isDevEnv && error instanceof Error
+            ? error.message
+            : "Erreur lors de l'import",
       },
       { status: 500 }
     );

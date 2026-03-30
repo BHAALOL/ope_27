@@ -21,7 +21,15 @@ const CandidatSchema = z.object({
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const onlyPublished = searchParams.get("published") !== "false";
+    let onlyPublished = true;
+
+    // Only allow viewing unpublished candidates if authenticated
+    if (searchParams.get("published") === "false") {
+      const session = await getServerSession(authOptions);
+      if (session) {
+        onlyPublished = false;
+      }
+    }
 
     const candidats = await prisma.candidat.findMany({
       where: onlyPublished ? { published: true } : undefined,
@@ -32,7 +40,9 @@ export async function GET(req: NextRequest) {
       orderBy: { nom: "asc" },
     });
 
-    return NextResponse.json({ data: candidats });
+    const response = NextResponse.json({ data: candidats });
+    response.headers.set("Cache-Control", "public, s-maxage=60, stale-while-revalidate=120");
+    return response;
   } catch (error) {
     console.error("GET /api/candidats error:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

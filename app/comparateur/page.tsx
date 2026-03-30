@@ -6,6 +6,9 @@ import { BarChart2, X, Plus } from "lucide-react";
 import { getInitials, formatScore } from "@/lib/utils";
 import type { Candidat } from "@/types";
 
+// Note: metadata must be in a separate layout file for client components
+// See app/comparateur/layout.tsx
+
 export default function ComparateurPage() {
   const [candidats, setCandidats] = useState<Candidat[]>([]);
   const [selected, setSelected] = useState<Candidat[]>([]);

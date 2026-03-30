@@ -2,11 +2,23 @@
 const nextConfig = {
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "**" },
+      { protocol: "https", hostname: "**.wikimedia.org" },
+      { protocol: "https", hostname: "**.wikipedia.org" },
+      { protocol: "https", hostname: "**.gouvernement.fr" },
+      { protocol: "https", hostname: "**.assemblee-nationale.fr" },
+      { protocol: "https", hostname: "**.senat.fr" },
+      { protocol: "https", hostname: "**.elysee.fr" },
+      { protocol: "https", hostname: "**.polymarket.com" },
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "res.cloudinary.com" },
+      { protocol: "https", hostname: "pbs.twimg.com" },
     ],
   },
   output: "standalone",
   poweredByHeader: false,
+  experimental: {
+    instrumentationHook: true,
+  },
   async headers() {
     return [
       {

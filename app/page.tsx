@@ -4,6 +4,8 @@ import { CandidatesCarousel } from "@/components/home/CandidatesCarousel";
 import { LatestNews } from "@/components/home/LatestNews";
 import { prisma } from "@/lib/prisma";
 
+export const revalidate = 120; // Revalidate every 2 minutes
+
 async function getHomeData() {
   try {
     const [candidats, sondages, actualites] = await Promise.all([

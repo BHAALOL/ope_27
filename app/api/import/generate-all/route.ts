@@ -108,7 +108,11 @@ async function generateContent(
     provider === "openai"
       ? await generateWithOpenAI(prompt)
       : await generateWithAnthropic(prompt);
-  return JSON.parse(cleanJsonResponse(rawText));
+  try {
+    return JSON.parse(cleanJsonResponse(rawText));
+  } catch {
+    throw new Error("Impossible de parser la réponse IA");
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -225,10 +229,10 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error("POST /api/import/generate-all error:", error);
+    const isDevEnv = process.env.NODE_ENV === "development";
     return NextResponse.json(
       {
-        error:
-          error instanceof Error
+        error: isDevEnv && error instanceof Error
             ? error.message
             : "Erreur lors de la génération",
       },

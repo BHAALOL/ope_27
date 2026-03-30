@@ -22,7 +22,15 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const tag = searchParams.get("tag");
     const candidatId = searchParams.get("candidatId");
-    const onlyPublished = searchParams.get("published") !== "false";
+    let onlyPublished = true;
+
+    // Only allow viewing unpublished articles if authenticated
+    if (searchParams.get("published") === "false") {
+      const session = await getServerSession(authOptions);
+      if (session) {
+        onlyPublished = false;
+      }
+    }
 
     const actualites = await prisma.actualite.findMany({
       where: {
@@ -34,7 +42,9 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json({ data: actualites });
+    const response = NextResponse.json({ data: actualites });
+    response.headers.set("Cache-Control", "public, s-maxage=60, stale-while-revalidate=120");
+    return response;
   } catch (error) {
     console.error("GET /api/actualites error:", error);
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

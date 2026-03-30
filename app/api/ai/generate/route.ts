@@ -167,11 +167,11 @@ export async function POST(req: NextRequest) {
       );
     }
     console.error("POST /api/ai/generate error:", error);
+    const isDevEnv = process.env.NODE_ENV === "development";
     return NextResponse.json(
       {
         success: false,
-        error:
-          error instanceof Error
+        error: isDevEnv && error instanceof Error
             ? error.message
             : "Erreur lors de la génération IA",
       },
