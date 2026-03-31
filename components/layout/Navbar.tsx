@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { Menu, X, Flag } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -21,14 +22,25 @@ export function Navbar() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 20);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
     setIsOpen(false);
   }, [pathname]);
+
+  const toggleMenu = useCallback(() => setIsOpen((prev) => !prev), []);
 
   const isAdmin = pathname.startsWith("/admin");
   if (isAdmin) return null;
@@ -41,13 +53,14 @@ export function Navbar() {
           ? "glass-dark shadow-lg shadow-black/20"
           : "bg-transparent"
       )}
+      aria-label="Navigation principale"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <a href="/" className="flex items-center gap-3 group">
+          <Link href="/" className="flex items-center gap-3 group">
             <div className="relative">
-              <div className="w-8 h-8 rounded-lg overflow-hidden flex">
+              <div className="w-8 h-8 rounded-lg overflow-hidden flex" aria-hidden="true">
                 <div className="flex-1 bg-[#002395]" />
                 <div className="flex-1 bg-white" />
                 <div className="flex-1 bg-[#ED2939]" />
@@ -62,12 +75,12 @@ export function Navbar() {
                 2027
               </span>
             </div>
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
@@ -76,29 +89,31 @@ export function Navbar() {
                     ? "text-white bg-white/10"
                     : "text-gray-300 hover:text-white hover:bg-white/5"
                 )}
+                aria-current={pathname === link.href ? "page" : undefined}
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </div>
 
           {/* Admin Link */}
           <div className="hidden md:flex items-center gap-3">
-            <a
+            <Link
               href="/admin"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#002395]/20 text-blue-300 border border-[#002395]/30 hover:bg-[#002395]/40 transition-all"
             >
-              <Flag size={12} />
+              <Flag size={12} aria-hidden="true" />
               Admin
-            </a>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
           <button
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={toggleMenu}
             className="md:hidden p-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
             aria-label={isOpen ? "Fermer le menu" : "Ouvrir le menu"}
             aria-expanded={isOpen}
+            aria-controls="mobile-menu"
           >
             {isOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -107,10 +122,10 @@ export function Navbar() {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden glass-dark border-t border-white/5">
+        <div id="mobile-menu" className="md:hidden glass-dark border-t border-white/5" role="navigation" aria-label="Menu mobile">
           <div className="px-4 py-3 space-y-1">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
@@ -119,22 +134,23 @@ export function Navbar() {
                     ? "text-white bg-white/10"
                     : "text-gray-300 hover:text-white hover:bg-white/5"
                 )}
+                aria-current={pathname === link.href ? "page" : undefined}
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
-            <a
+            <Link
               href="/admin"
               className="block px-3 py-2 rounded-lg text-sm font-medium text-blue-300 hover:bg-white/5"
             >
               Administration
-            </a>
+            </Link>
           </div>
         </div>
       )}
 
       {/* Tricolor bottom border */}
-      <div className="h-px w-full tricolor opacity-40" />
+      <div className="h-px w-full tricolor opacity-40" aria-hidden="true" />
     </nav>
   );
 }

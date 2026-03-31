@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireAdmin } from "@/lib/api-auth";
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { z } from "zod";
@@ -124,12 +123,15 @@ async function generateWithOpenAI(
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if ("error" in auth) return auth.error;
 
-    const body = await req.json();
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ error: "JSON invalide" }, { status: 400 });
+    }
     const { type, name, additionalContext, provider } =
       RequestSchema.parse(body);
 
@@ -167,14 +169,8 @@ export async function POST(req: NextRequest) {
       );
     }
     console.error("POST /api/ai/generate error:", error);
-    const isDevEnv = process.env.NODE_ENV === "development";
     return NextResponse.json(
-      {
-        success: false,
-        error: isDevEnv && error instanceof Error
-            ? error.message
-            : "Erreur lors de la génération IA",
-      },
+      { success: false, error: "Erreur lors de la génération IA" },
       { status: 500 }
     );
   }

@@ -18,8 +18,10 @@ COPY . .
 RUN npx prisma generate
 
 # Build the application
+# Provide a dummy DATABASE_URL for build-time (Prisma Client needs it at import, not at query)
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+ENV DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder"
 
 RUN npm run build
 

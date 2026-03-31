@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Building2, Users } from "lucide-react";
 import type { Metadata } from "next";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export const metadata: Metadata = {
   title: "Partis politiques",

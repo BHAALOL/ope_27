@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -10,7 +11,7 @@ interface PageProps {
   params: { slug: string };
 }
 
-async function getArticle(slug: string) {
+const getArticle = cache(async function getArticle(slug: string) {
   try {
     return await prisma.actualite.findUnique({
       where: { slug, published: true },
@@ -19,14 +20,28 @@ async function getArticle(slug: string) {
   } catch {
     return null;
   }
-}
+});
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const article = await getArticle(params.slug);
   if (!article) return { title: "Article introuvable" };
+  const description = article.resume?.substring(0, 160) || article.titre;
   return {
     title: article.titre,
-    description: article.resume?.substring(0, 160),
+    description,
+    openGraph: {
+      title: article.titre,
+      description,
+      type: "article",
+      ...(article.image ? { images: [{ url: article.image }] } : {}),
+      ...(article.publishedAt ? { publishedTime: article.publishedAt.toISOString() } : {}),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.titre,
+      description,
+      ...(article.image ? { images: [article.image] } : {}),
+    },
   };
 }
 
@@ -110,6 +125,7 @@ export default async function ArticlePage({ params }: PageProps) {
                 src={article.image}
                 alt={article.titre}
                 fill
+                sizes="(max-width: 768px) 100vw, 768px"
                 className="object-cover"
               />
             </div>

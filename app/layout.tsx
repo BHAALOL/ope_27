@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "fr_FR",
-    url: "https://presidentielle2027.fr",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "https://presidentielle2027.fr",
     title: "Présidentielle 2027",
     description: "Suivez la campagne présidentielle française 2027",
     siteName: "Présidentielle 2027",

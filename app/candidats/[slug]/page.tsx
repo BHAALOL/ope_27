@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { CandidateProfile } from "@/components/candidats/CandidateProfile";
@@ -7,7 +8,7 @@ interface PageProps {
   params: { slug: string };
 }
 
-async function getCandidat(slug: string) {
+const getCandidat = cache(async function getCandidat(slug: string) {
   try {
     return await prisma.candidat.findUnique({
       where: { slug, published: true },
@@ -27,14 +28,28 @@ async function getCandidat(slug: string) {
   } catch {
     return null;
   }
-}
+});
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const candidat = await getCandidat(params.slug);
   if (!candidat) return { title: "Candidat introuvable" };
+  const fullName = `${candidat.prenom} ${candidat.nom}`;
+  const description = candidat.biographie?.substring(0, 160) || `Profil de ${fullName} - Présidentielle 2027`;
   return {
-    title: `${candidat.prenom} ${candidat.nom}`,
-    description: candidat.biographie?.substring(0, 160),
+    title: fullName,
+    description,
+    openGraph: {
+      title: fullName,
+      description,
+      type: "profile",
+      ...(candidat.photo ? { images: [{ url: candidat.photo }] } : {}),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: fullName,
+      description,
+      ...(candidat.photo ? { images: [candidat.photo] } : {}),
+    },
   };
 }
 

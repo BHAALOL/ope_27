@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireAdmin } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
 import { fetchPolymarketElection } from "@/lib/polymarket";
 import { slugify } from "@/lib/utils";
@@ -99,12 +98,15 @@ async function identifyPartiesWithOpenAI(
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if ("error" in auth) return auth.error;
 
-    const body = await req.json().catch(() => ({}));
+    let body: Record<string, unknown> = {};
+    try {
+      body = await req.json();
+    } catch {
+      // Allow empty body - provider defaults to anthropic
+    }
     const provider = body.provider === "openai" ? "openai" : "anthropic";
 
     // 1. Fetch candidates from Polymarket
@@ -222,13 +224,8 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error("POST /api/import/polymarket error:", error);
-    const isDevEnv = process.env.NODE_ENV === "development";
     return NextResponse.json(
-      {
-        error: isDevEnv && error instanceof Error
-            ? error.message
-            : "Erreur lors de l'import",
-      },
+      { error: "Erreur lors de l'import" },
       { status: 500 }
     );
   }

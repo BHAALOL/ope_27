@@ -107,6 +107,7 @@ export default async function ActualitesPage({ searchParams }: PageProps) {
                                 src={article.image}
                                 alt={article.titre}
                                 fill
+                                sizes="192px"
                                 className="object-cover"
                               />
                             </div>

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireAdmin } from "@/lib/api-auth";
 import { searchRecentNews } from "@/lib/perplexity";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
@@ -12,12 +11,15 @@ const SearchSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
+    const auth = await requireAdmin();
+    if ("error" in auth) return auth.error;
 
-    const body = await req.json();
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ error: "JSON invalide" }, { status: 400 });
+    }
     const { query, maxResults } = SearchSchema.parse(body);
 
     // Fetch existing candidates to help Perplexity match names
@@ -40,14 +42,8 @@ export async function POST(req: NextRequest) {
       );
     }
     console.error("POST /api/ai/search-news error:", error);
-    const isDevEnv = process.env.NODE_ENV === "development";
     return NextResponse.json(
-      {
-        success: false,
-        error: isDevEnv && error instanceof Error
-            ? error.message
-            : "Erreur lors de la recherche",
-      },
+      { success: false, error: "Erreur lors de la recherche" },
       { status: 500 }
     );
   }

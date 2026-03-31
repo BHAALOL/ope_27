@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
@@ -9,7 +10,7 @@ interface PageProps {
   params: { slug: string };
 }
 
-async function getParti(slug: string) {
+const getParti = cache(async function getParti(slug: string) {
   try {
     return await prisma.parti.findUnique({
       where: { slug, published: true },
@@ -25,14 +26,25 @@ async function getParti(slug: string) {
   } catch {
     return null;
   }
-}
+});
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const parti = await getParti(params.slug);
   if (!parti) return { title: "Parti introuvable" };
+  const description = parti.description?.substring(0, 160) || `${parti.nom} - Parti politique - Présidentielle 2027`;
   return {
     title: parti.nom,
-    description: parti.description?.substring(0, 160),
+    description,
+    openGraph: {
+      title: parti.nom,
+      description,
+      type: "website",
+    },
+    twitter: {
+      card: "summary",
+      title: parti.nom,
+      description,
+    },
   };
 }
 
