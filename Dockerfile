@@ -53,8 +53,8 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/prisma ./prisma
 
-# Entrypoint script: run migrations then start app
-RUN printf '#!/bin/sh\nnpx prisma migrate deploy\nexec node server.js\n' > /start.sh \
+# Entrypoint script: run migrations then start app (fail fast if migration fails)
+RUN printf '#!/bin/sh\nset -e\necho "Running database migrations..."\nnpx prisma migrate deploy\necho "Migrations complete. Starting application..."\nexec node server.js\n' > /start.sh \
   && chmod +x /start.sh \
   && chown nextjs:nodejs /start.sh
 
@@ -65,7 +65,7 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
 
 CMD ["/start.sh"]

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -35,17 +35,24 @@ export function CandidateProfile({ candidat }: CandidateProfileProps) {
   const partyColor = candidat.parti?.couleur || "#6366f1";
   const initials = getInitials(candidat.nom, candidat.prenom);
 
-  const sondagesData = (candidat.sondages || [])
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    .map((s) => ({
-      date: formatDate(s.date),
-      score: s.score,
-      institut: s.institut,
-    }));
+  const sondagesData = useMemo(
+    () =>
+      [...(candidat.sondages || [])]
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+        .map((s) => ({
+          date: formatDate(s.date),
+          score: s.score,
+          institut: s.institut,
+        })),
+    [candidat.sondages]
+  );
 
-  const latestScore = candidat.sondages?.sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  )[0]?.score;
+  const latestScore = useMemo(() => {
+    if (!candidat.sondages?.length) return undefined;
+    return [...candidat.sondages].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    )[0]?.score;
+  }, [candidat.sondages]);
 
   const programme = candidat.programme as Record<string, unknown> | null;
   const positions = candidat.positions as Record<string, unknown> | null;

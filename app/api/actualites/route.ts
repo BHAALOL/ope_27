@@ -25,10 +25,11 @@ export async function GET(req: NextRequest) {
     const candidatId = searchParams.get("candidatId");
     let onlyPublished = true;
 
-    // Only allow viewing unpublished articles if authenticated
+    // Only allow viewing unpublished articles if authenticated as admin
     if (searchParams.get("published") === "false") {
       const session = await getServerSession(authOptions);
-      if (session) {
+      const role = session?.user?.role;
+      if (role === "ADMIN" || role === "SUPER_ADMIN") {
         onlyPublished = false;
       }
     }
@@ -73,25 +74,28 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const slug = slugify(data.titre);
-    const existing = await prisma.actualite.findUnique({ where: { slug } });
-    const finalSlug = existing ? `${slug}-${Date.now()}` : slug;
+    const baseSlug = slugify(data.titre);
 
-    const actualite = await prisma.actualite.create({
-      data: {
-        slug: finalSlug,
-        titre: data.titre,
-        contenu: data.contenu,
-        resume: data.resume ?? null,
-        image: data.image ?? null,
-        source: data.source ?? null,
-        sourceUrl: data.sourceUrl ?? null,
-        candidatId: data.candidatId ?? null,
-        tags: data.tags ?? [],
-        published: data.published ?? false,
-        publishedAt: data.published ? new Date() : null,
-      },
-      include: { candidat: true },
+    const actualite = await prisma.$transaction(async (tx) => {
+      const existing = await tx.actualite.findUnique({ where: { slug: baseSlug } });
+      const finalSlug = existing ? `${baseSlug}-${Date.now()}` : baseSlug;
+
+      return tx.actualite.create({
+        data: {
+          slug: finalSlug,
+          titre: data.titre,
+          contenu: data.contenu,
+          resume: data.resume ?? null,
+          image: data.image ?? null,
+          source: data.source ?? null,
+          sourceUrl: data.sourceUrl ?? null,
+          candidatId: data.candidatId ?? null,
+          tags: data.tags ?? [],
+          published: data.published ?? false,
+          publishedAt: data.published ? new Date() : null,
+        },
+        include: { candidat: true },
+      });
     });
 
     return NextResponse.json({ data: actualite }, { status: 201 });

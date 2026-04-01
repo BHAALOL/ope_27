@@ -19,9 +19,11 @@ interface CandidateCardProps {
 export function CandidateCard({ candidat }: CandidateCardProps) {
   const partyColor = candidat.parti?.couleur || "#6366f1";
   const initials = getInitials(candidat.nom, candidat.prenom);
-  const latestScore = candidat.sondages?.sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  )[0]?.score;
+  const latestScore = candidat.sondages?.length
+    ? [...candidat.sondages].sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      )[0]?.score
+    : undefined;
 
   return (
     <Link href={`/candidats/${candidat.slug}`} className="group block">

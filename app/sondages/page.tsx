@@ -1,11 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { SondagesCharts } from "@/components/sondages/SondagesCharts";
-
-export const revalidate = 120;
 import { PolymarketSection } from "@/components/sondages/PolymarketSection";
 import { TrendingUp } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import type { Metadata } from "next";
+
+export const revalidate = 120;
 
 export const metadata: Metadata = {
   title: "Sondages",
@@ -77,10 +77,7 @@ export default async function SondagesPage() {
     .sort((a, b) => b.score - a.score);
 
   // Get unique institutes
-  const institsList = sondages.map((s) => s.institut);
-  const institutes: string[] = institsList.filter(
-    (inst, idx) => institsList.indexOf(inst) === idx
-  );
+  const institutes = Array.from(new Set(sondages.map((s) => s.institut)));
 
   return (
     <div className="min-h-screen pt-24 pb-20">

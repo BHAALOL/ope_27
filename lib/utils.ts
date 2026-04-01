@@ -26,7 +26,7 @@ export function timeAgo(date: string | Date): string {
 export function daysUntilElection(): number {
   const electionDate = new Date("2027-04-25T00:00:00Z");
   const today = new Date();
-  return differenceInDays(electionDate, today);
+  return Math.max(0, differenceInDays(electionDate, today));
 }
 
 export function slugify(text: string): string {

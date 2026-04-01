@@ -7,8 +7,15 @@ async function main() {
   console.log("🌱 Seeding database...");
 
   // Create admin user
-  const adminPassword = process.env.ADMIN_PASSWORD || "admin2027!";
-  const hashedPassword = await bcrypt.hash(adminPassword, 12);
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword && process.env.NODE_ENV === "production") {
+    throw new Error("❌ ADMIN_PASSWORD must be set in production. Aborting seed.");
+  }
+  const password = adminPassword || "admin2027!";
+  if (password.length < 8) {
+    throw new Error("❌ ADMIN_PASSWORD must be at least 8 characters.");
+  }
+  const hashedPassword = await bcrypt.hash(password, 12);
   const admin = await prisma.user.upsert({
     where: { email: "admin@presidentielle2027.fr" },
     update: {},
@@ -20,7 +27,7 @@ async function main() {
     },
   });
   console.log("✅ Admin user created:", admin.email);
-  if (!process.env.ADMIN_PASSWORD) {
+  if (!adminPassword) {
     console.warn("⚠️  Mot de passe admin par défaut utilisé. Définissez ADMIN_PASSWORD en production.");
   }
 

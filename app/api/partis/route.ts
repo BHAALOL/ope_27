@@ -44,23 +44,26 @@ export async function POST(req: NextRequest) {
     }
     const data = PartiSchema.parse(body);
 
-    const slug = slugify(data.sigle || data.nom);
-    const existing = await prisma.parti.findUnique({ where: { slug } });
-    const finalSlug = existing ? `${slug}-${Date.now()}` : slug;
+    const baseSlug = slugify(data.sigle || data.nom);
 
-    const parti = await prisma.parti.create({
-      data: {
-        slug: finalSlug,
-        nom: data.nom,
-        sigle: data.sigle ?? null,
-        logo: data.logo ?? null,
-        couleur: data.couleur ?? null,
-        description: data.description ?? null,
-        histoire: data.histoire ?? null,
-        ideologie: data.ideologie ?? null,
-        fondation: data.fondation ?? null,
-        published: data.published ?? false,
-      },
+    const parti = await prisma.$transaction(async (tx) => {
+      const existing = await tx.parti.findUnique({ where: { slug: baseSlug } });
+      const finalSlug = existing ? `${baseSlug}-${Date.now()}` : baseSlug;
+
+      return tx.parti.create({
+        data: {
+          slug: finalSlug,
+          nom: data.nom,
+          sigle: data.sigle ?? null,
+          logo: data.logo ?? null,
+          couleur: data.couleur ?? null,
+          description: data.description ?? null,
+          histoire: data.histoire ?? null,
+          ideologie: data.ideologie ?? null,
+          fondation: data.fondation ?? null,
+          published: data.published ?? false,
+        },
+      });
     });
 
     return NextResponse.json({ data: parti }, { status: 201 });

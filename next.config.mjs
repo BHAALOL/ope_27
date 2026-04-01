@@ -2,7 +2,8 @@
 const nextConfig = {
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "**.wikimedia.org" },
+      { protocol: "https", hostname: "upload.wikimedia.org" },
+      { protocol: "https", hostname: "commons.wikimedia.org" },
       { protocol: "https", hostname: "**.wikipedia.org" },
       { protocol: "https", hostname: "**.gouvernement.fr" },
       { protocol: "https", hostname: "**.assemblee-nationale.fr" },
@@ -16,6 +17,7 @@ const nextConfig = {
   },
   output: "standalone",
   poweredByHeader: false,
+  reactStrictMode: true,
   experimental: {
     instrumentationHook: true,
   },
@@ -35,6 +37,10 @@ const nextConfig = {
           {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
+          },
+          {
+            key: "X-XSS-Protection",
+            value: "1; mode=block",
           },
         ],
       },

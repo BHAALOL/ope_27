@@ -3,16 +3,9 @@
  * Validates required variables at startup.
  */
 
-function getRequiredEnv(key: string): string {
-  const value = process.env[key];
-  if (!value) {
-    throw new Error(`❌ Missing required environment variable: ${key}`);
-  }
-  return value;
-}
-
 export function validateEnv() {
   const errors: string[] = [];
+  const warnings: string[] = [];
 
   // Required for core functionality
   if (!process.env.DATABASE_URL) {
@@ -30,9 +23,30 @@ export function validateEnv() {
       errors.push("NEXTAUTH_URL is required in production");
     }
 
-    if (process.env.NEXTAUTH_SECRET === "your-nextauth-secret-min-32-chars-change-in-production") {
-      errors.push("NEXTAUTH_SECRET must be changed from the default value in production");
+    if (
+      process.env.NEXTAUTH_SECRET ===
+      "your-nextauth-secret-min-32-chars-change-in-production"
+    ) {
+      errors.push(
+        "NEXTAUTH_SECRET must be changed from the default value in production"
+      );
     }
+
+    if (!process.env.NEXT_PUBLIC_SITE_URL) {
+      warnings.push("NEXT_PUBLIC_SITE_URL is not set — sitemap and SEO may not work correctly");
+    }
+  }
+
+  // Optional service keys — warn if missing
+  if (!process.env.ANTHROPIC_API_KEY && !process.env.OPENAI_API_KEY) {
+    warnings.push(
+      "Neither ANTHROPIC_API_KEY nor OPENAI_API_KEY is set — AI generation will be unavailable"
+    );
+  }
+
+  if (warnings.length > 0) {
+    console.warn("⚠️  Environment warnings:");
+    warnings.forEach((w) => console.warn(`   - ${w}`));
   }
 
   if (errors.length > 0) {

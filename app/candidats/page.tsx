@@ -3,6 +3,8 @@ import { CandidateCard } from "@/components/candidats/CandidateCard";
 import { Users } from "lucide-react";
 import type { Metadata } from "next";
 
+export const revalidate = 120;
+
 export const metadata: Metadata = {
   title: "Candidats",
   description: "Découvrez tous les candidats à la présidentielle 2027",

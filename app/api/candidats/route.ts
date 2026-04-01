@@ -24,10 +24,11 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     let onlyPublished = true;
 
-    // Only allow viewing unpublished candidates if authenticated
+    // Only allow viewing unpublished candidates if authenticated as admin
     if (searchParams.get("published") === "false") {
       const session = await getServerSession(authOptions);
-      if (session) {
+      const role = session?.user?.role;
+      if (role === "ADMIN" || role === "SUPER_ADMIN") {
         onlyPublished = false;
       }
     }
@@ -71,25 +72,28 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const slug = slugify(`${data.prenom}-${data.nom}`);
-    const existing = await prisma.candidat.findUnique({ where: { slug } });
-    const finalSlug = existing ? `${slug}-${Date.now()}` : slug;
+    const baseSlug = slugify(`${data.prenom}-${data.nom}`);
 
-    const candidat = await prisma.candidat.create({
-      data: {
-        slug: finalSlug,
-        prenom: data.prenom,
-        nom: data.nom,
-        age: data.age ?? null,
-        photo: data.photo ?? null,
-        partiId: data.partiId ?? null,
-        biographie: data.biographie ?? null,
-        programme: data.programme ? (data.programme as Record<string, string>) : undefined,
-        positions: data.positions ? (data.positions as Record<string, string>) : undefined,
-        published: data.published ?? false,
-        featured: data.featured ?? false,
-      },
-      include: { parti: true },
+    const candidat = await prisma.$transaction(async (tx) => {
+      const existing = await tx.candidat.findUnique({ where: { slug: baseSlug } });
+      const finalSlug = existing ? `${baseSlug}-${Date.now()}` : baseSlug;
+
+      return tx.candidat.create({
+        data: {
+          slug: finalSlug,
+          prenom: data.prenom,
+          nom: data.nom,
+          age: data.age ?? null,
+          photo: data.photo ?? null,
+          partiId: data.partiId ?? null,
+          biographie: data.biographie ?? null,
+          programme: data.programme ? (data.programme as Record<string, string>) : undefined,
+          positions: data.positions ? (data.positions as Record<string, string>) : undefined,
+          published: data.published ?? false,
+          featured: data.featured ?? false,
+        },
+        include: { parti: true },
+      });
     });
 
     return NextResponse.json({ data: candidat }, { status: 201 });

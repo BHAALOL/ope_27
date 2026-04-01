@@ -20,6 +20,13 @@ export async function middleware(req: NextRequest) {
       const loginUrl = new URL("/admin/login", req.url);
       return NextResponse.redirect(loginUrl);
     }
+
+    // Verify admin role
+    const role = token.role as string | undefined;
+    if (role !== "ADMIN" && role !== "SUPER_ADMIN") {
+      const loginUrl = new URL("/admin/login", req.url);
+      return NextResponse.redirect(loginUrl);
+    }
   }
 
   return NextResponse.next();

@@ -5,6 +5,8 @@ import { Newspaper, Clock, Tag } from "lucide-react";
 import { formatDate, truncate } from "@/lib/utils";
 import type { Metadata } from "next";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Actualités",
   description: "Actualités de la campagne présidentielle 2027",
@@ -56,9 +58,7 @@ export default async function ActualitesPage({ searchParams }: PageProps) {
       .findMany({ where: { published: true }, select: { tags: true } })
       .catch(() => [])
   ).flatMap((a) => a.tags);
-  const allTags: string[] = rawTags.filter(
-    (tag, idx) => rawTags.indexOf(tag) === idx
-  );
+  const allTags = Array.from(new Set(rawTags));
 
   return (
     <div className="min-h-screen pt-24 pb-20">

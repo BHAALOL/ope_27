@@ -32,7 +32,8 @@ export function PollChart({ data, candidates }: PollChartProps) {
           tickLine={false}
           tickFormatter={(v) => {
             try {
-              return formatDate(v).split(" ")[0] + " " + formatDate(v).split(" ")[2];
+              const parts = formatDate(v).split(" ");
+              return parts[0] + " " + (parts[2] || "");
             } catch {
               return v;
             }
