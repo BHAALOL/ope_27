@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/api-auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/prisma";
 import { fetchPolymarketElection } from "@/lib/polymarket";
 import { slugify } from "@/lib/utils";
@@ -100,6 +101,16 @@ export async function POST(req: NextRequest) {
   try {
     const auth = await requireAdmin();
     if ("error" in auth) return auth.error;
+
+    // Rate limit: 3 imports per 5 minutes
+    const userId = "session" in auth ? auth.session.user.id : "unknown";
+    const rateCheck = checkRateLimit(`import-poly:${userId}`, 3, 300_000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: "Trop de requêtes d'import. Veuillez patienter." },
+        { status: 429, headers: { "Retry-After": String(Math.ceil((rateCheck.resetAt - Date.now()) / 1000)) } }
+      );
+    }
 
     let body: Record<string, unknown> = {};
     try {

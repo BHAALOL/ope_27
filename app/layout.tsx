@@ -58,7 +58,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="bg-dark-900 text-white antialiased">
+      <body className="bg-dark-900 text-white antialiased font-sans">
         <Providers>
           <div className="flex flex-col min-h-screen">
             <Navbar />

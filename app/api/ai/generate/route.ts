@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/api-auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { z } from "zod";
@@ -125,6 +126,21 @@ export async function POST(req: NextRequest) {
   try {
     const auth = await requireAdmin();
     if ("error" in auth) return auth.error;
+
+    // Rate limit: 10 AI generations per minute per user
+    const userId = "session" in auth ? auth.session.user.id : "unknown";
+    const rateCheck = checkRateLimit(`ai-generate:${userId}`, 10, 60_000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { success: false, error: "Trop de requêtes. Veuillez patienter." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(Math.ceil((rateCheck.resetAt - Date.now()) / 1000)),
+          },
+        }
+      );
+    }
 
     let body: unknown;
     try {

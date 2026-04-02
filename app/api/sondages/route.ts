@@ -13,13 +13,22 @@ const SondageSchema = z.object({
   source: z.string().url().max(500).nullable().optional(),
 });
 
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
-    const sondages = await prisma.sondage.findMany({
-      include: { candidat: { include: { parti: true } } },
-      orderBy: { date: "desc" },
-    });
-    const response = NextResponse.json({ data: sondages });
+    const { searchParams } = new URL(req.url);
+    const limit = Math.min(parseInt(searchParams.get("limit") || "200"), 500);
+    const offset = parseInt(searchParams.get("offset") || "0");
+
+    const [sondages, total] = await Promise.all([
+      prisma.sondage.findMany({
+        include: { candidat: { include: { parti: true } } },
+        orderBy: { date: "desc" },
+        take: limit,
+        skip: offset,
+      }),
+      prisma.sondage.count(),
+    ]);
+    const response = NextResponse.json({ data: sondages, total, limit, offset });
     response.headers.set("Cache-Control", "public, s-maxage=60, stale-while-revalidate=120");
     return response;
   } catch (error) {

@@ -15,12 +15,21 @@ const EvenementSchema = z.object({
   lienInscription: z.string().url().max(500).nullable().optional(),
 });
 
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
-    const evenements = await prisma.evenement.findMany({
-      orderBy: { dateDebut: "asc" },
-    });
-    const response = NextResponse.json({ data: evenements });
+    const { searchParams } = new URL(req.url);
+    const limit = Math.min(parseInt(searchParams.get("limit") || "100"), 500);
+    const offset = parseInt(searchParams.get("offset") || "0");
+
+    const [evenements, total] = await Promise.all([
+      prisma.evenement.findMany({
+        orderBy: { dateDebut: "asc" },
+        take: limit,
+        skip: offset,
+      }),
+      prisma.evenement.count(),
+    ]);
+    const response = NextResponse.json({ data: evenements, total, limit, offset });
     response.headers.set("Cache-Control", "public, s-maxage=60, stale-while-revalidate=120");
     return response;
   } catch (error) {

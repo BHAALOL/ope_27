@@ -53,8 +53,10 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/prisma ./prisma
 
-# Entrypoint script: run migrations then start app (fail fast if migration fails)
-RUN printf '#!/bin/sh\nset -e\necho "Running database migrations..."\nnpx prisma migrate deploy\necho "Migrations complete. Starting application..."\nexec node server.js\n' > /start.sh \
+# Entrypoint script: start the application
+# Note: Migrations are handled by the 'migrate' service in docker-compose.yml.
+# When running standalone (without compose), set RUN_MIGRATIONS=true to auto-migrate.
+RUN printf '#!/bin/sh\nset -e\nif [ "$RUN_MIGRATIONS" = "true" ]; then\n  echo "Running database migrations..."\n  npx prisma migrate deploy\n  echo "Migrations complete."\nfi\necho "Starting application..."\nexec node server.js\n' > /start.sh \
   && chmod +x /start.sh \
   && chown nextjs:nodejs /start.sh
 

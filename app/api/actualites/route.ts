@@ -45,7 +45,11 @@ export async function GET(req: NextRequest) {
     });
 
     const response = NextResponse.json({ data: actualites });
-    response.headers.set("Cache-Control", "public, s-maxage=60, stale-while-revalidate=120");
+    if (onlyPublished) {
+      response.headers.set("Cache-Control", "public, s-maxage=60, stale-while-revalidate=120");
+    } else {
+      response.headers.set("Cache-Control", "private, no-store");
+    }
     return response;
   } catch (error) {
     console.error("GET /api/actualites error:", error);

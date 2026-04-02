@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { requireAdmin } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
@@ -16,14 +18,30 @@ const PartiSchema = z.object({
   published: z.boolean().optional().default(false),
 });
 
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url);
+    let onlyPublished = true;
+
+    if (searchParams.get("published") === "false") {
+      const session = await getServerSession(authOptions);
+      const role = session?.user?.role;
+      if (role === "ADMIN" || role === "SUPER_ADMIN") {
+        onlyPublished = false;
+      }
+    }
+
     const partis = await prisma.parti.findMany({
+      where: onlyPublished ? { published: true } : undefined,
       include: { candidats: { where: { published: true }, select: { id: true } } },
       orderBy: { nom: "asc" },
     });
     const response = NextResponse.json({ data: partis });
-    response.headers.set("Cache-Control", "public, s-maxage=60, stale-while-revalidate=120");
+    if (onlyPublished) {
+      response.headers.set("Cache-Control", "public, s-maxage=60, stale-while-revalidate=120");
+    } else {
+      response.headers.set("Cache-Control", "private, no-store");
+    }
     return response;
   } catch (error) {
     console.error("GET /api/partis error:", error);
